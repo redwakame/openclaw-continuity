@@ -81,6 +81,12 @@ Questions, feedback, and implementation discussion:
 
 - `aderobot666@gmail.com`
 
+If this package helps and you want to keep improvements and maintenance moving,
+please star the repository on GitHub.
+
+如果這個技能對你有幫助，而且你也期待它持續優化與維護，歡迎在 GitHub
+給一顆星，這會是最直接的支持。
+
 ## What makes it different
 
 - **Time sense that is actually usable**
@@ -243,7 +249,7 @@ If you want a one-line package fetch through npm without waiting for a public np
 registry publish, install directly from the GitHub repository:
 
 ```bash
-npm install github:AdaBot666/openclaw-continuity#v2.0.0
+npm install github:redwakame/openclaw-continuity#v2.0.0
 ```
 
 This fetches the release source through npm's GitHub transport path.

@@ -1,7 +1,7 @@
 ---
 name: personal-hooks
 description: Structured continuity and follow-up skill for OpenClaw agents. Use when an agent needs to decide whether natural user dialogue should stay as casual chat, become staged memory, or become tracked follow-up with carryover, closure, sleep/rest suppress, traceability, and release-grade frontstage safety guards. This public V2 package covers parked topics, watchful states, delegated tasks, sensitive events, candidate→incident→hook flow, /new carryover, deterministic onboarding/guided settings, and time-aware continuity guards. It does not include always-on idle/social nudging as a default feature.
-homepage: https://github.com/AdaBot666/openclaw-continuity
+homepage: https://github.com/redwakame/openclaw-continuity
 metadata: {"openclaw":{"os":["darwin","linux"],"requires":{"bins":["python3"]}}}
 ---
 

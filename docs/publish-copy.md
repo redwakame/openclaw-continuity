@@ -184,6 +184,9 @@ This skill is designed for agents that should remember, care, and follow up with
 
 Contact: `aderobot666@gmail.com`
 
+If this skill helps and you want to keep updates and maintenance moving,
+please star the GitHub repository.
+
 ### 中文
 
 `OpenClaw Continuity` 是替 OpenClaw agent 補上結構化延續層的技能包。
@@ -208,6 +211,9 @@ Contact: `aderobot666@gmail.com`
 這個技能適合那些需要「記得、關心、追蹤」，但又不能把正常聊天搞亂的 agent。
 
 聯絡與回饋：`aderobot666@gmail.com`
+
+如果這個技能對你有幫助，而且你也期待它持續優化與維護，歡迎在 GitHub
+給一顆星，這會是最直接的支持。
 
 ## npm package summary
 

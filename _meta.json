@@ -4,8 +4,8 @@
   "description": "OpenClaw Continuity is a time-aware continuity and follow-up skill package with /new carryover, staged memory, tracked events, natural-language setting changes, and structured writeback.",
   "author": "Ice Fish",
   "license": "MIT-0",
-  "homepage": "https://github.com/AdaBot666/openclaw-continuity",
-  "repository": "https://github.com/AdaBot666/openclaw-continuity",
+  "homepage": "https://github.com/redwakame/openclaw-continuity",
+  "repository": "https://github.com/redwakame/openclaw-continuity",
   "keywords": [
     "openclaw",
     "skill",
