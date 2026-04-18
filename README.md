@@ -234,7 +234,7 @@ openclaw-workspace/
 ### ClawHub
 
 ```bash
-openclaw skills install personal-hooks
+openclaw skills install openclaw-continuity
 ```
 
 ### npm-style install from GitHub
