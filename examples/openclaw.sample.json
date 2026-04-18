@@ -1,0 +1,19 @@
+{
+  "plugins": {
+    "entries": {
+      "memory-lancedb-pro": {
+        "config": {
+          "embedding": {
+            "apiKey": "${JINA_API_KEY}",
+            "model": "jina-embeddings-v4",
+            "baseURL": "https://api.jina.ai/v1",
+            "dimensions": 1024,
+            "taskQuery": "retrieval.query",
+            "taskPassage": "retrieval.passage",
+            "normalized": true
+          }
+        }
+      }
+    }
+  }
+}

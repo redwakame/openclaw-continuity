@@ -1,0 +1,29 @@
+{
+  "name": "personal-hooks",
+  "version": "2.0.0",
+  "description": "OpenClaw Continuity is a time-aware continuity and follow-up skill package with /new carryover, staged memory, tracked events, natural-language setting changes, and structured writeback.",
+  "author": "Ice Fish",
+  "license": "MIT-0",
+  "homepage": "https://github.com/AdaBot666/openclaw-continuity",
+  "repository": "https://github.com/AdaBot666/openclaw-continuity",
+  "keywords": [
+    "openclaw",
+    "skill",
+    "continuity",
+    "follow-up",
+    "memory",
+    "agent",
+    "v2",
+    "onboarding",
+    "guided-settings",
+    "carryover"
+  ],
+  "openclaw": {
+    "skill_type": "continuity",
+    "entry_script": "scripts/personal_hooks.py",
+    "config_schema": "config.schema.json",
+    "requires": {
+      "python": ">=3.9"
+    }
+  }
+}

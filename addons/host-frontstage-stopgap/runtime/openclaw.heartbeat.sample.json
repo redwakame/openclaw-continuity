@@ -1,0 +1,14 @@
+{
+  "agents": {
+    "defaults": {
+      "heartbeat": {
+        "every": "30m",
+        "target": "telegram",
+        "to": "REPLACE_WITH_CHANNEL_RECIPIENT_ID",
+        "directPolicy": "allow",
+        "lightContext": true,
+        "isolatedSession": true
+      }
+    }
+  }
+}

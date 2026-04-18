@@ -1,0 +1,12 @@
+{
+  "id": "personal-hooks-bridge",
+  "name": "Personal Hooks Frontstage Stopgap",
+  "description": "Optional host-side outbound guard for <final> leakage and heartbeat/internal narration.",
+  "version": "2.0.0",
+  "kind": "extension",
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": true,
+    "properties": {}
+  }
+}
