@@ -22502,11 +22502,11 @@ def cmd_render(args):
             summary=hook.get("normalized_seed_summary") or hook.get("source_summary"),
         )
         raise SystemExit(f"hook blocked by temporal guard: {decision.get('reason')}")
+    if not DEFAULT_RENDER_TARGET:
+        raise SystemExit("PERSONAL_HOOKS_TARGET_TO is required for render output")
     message = render_text(profile, user_model, persona_state, hook, emotion_state=emotion_state)
     mark_hook_dispatched(store, hook, now_local(), message, render_reason=f"hook:{hook.get('type')}")
     save_hooks(store)
-    if not DEFAULT_RENDER_TARGET:
-        raise SystemExit("PERSONAL_HOOKS_TARGET_TO is required for render output")
     print(json.dumps({
         "id": hook["id"],
         "type": hook["type"],

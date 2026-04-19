@@ -1,5 +1,5 @@
 /**
- * personal-hooks-frontstage-stopgap v2.0.0 — cross-version stable
+ * personal-hooks-frontstage-stopgap v2.0.1 — cross-version stable
  *
  * Cross-version compatibility (2026.3.24 / 2026.4.5+):
  * - Gateway 2026.3.24: api.on() returns void 0 when registrationMode !== "full"
@@ -1149,7 +1149,7 @@ function sanitizeAssistantMessage(script: string, env: Record<string, string>, m
 
 export default {
   name: PLUGIN_NAME,
-  version: "2.0.0",
+  version: "2.0.1",
 
   configSchema: {
     parse(value: unknown) {
@@ -1553,6 +1553,33 @@ export default {
           return;
         }
         const channel = event?.metadata?.channel || ctx?.channelId || "unknown";
+        const precleanedContent = stripHostFrontstageLeakage(content);
+
+        if (
+          channel === "telegram" &&
+          !sessionKey &&
+          (
+            !precleanedContent ||
+            looksLikeRuntimeFragmentBundle(precleanedContent) ||
+            looksLikeHeartbeatNarration(content) ||
+            containsHeartbeatOperatorNarrative(content) ||
+            stillLooksInternal(content)
+          )
+        ) {
+          appendFrontstageBridgeAudit(dataDir, {
+            phase: "message_sending",
+            event: "cancel-empty-provenance-runtime-reply",
+            sessionKey,
+            channel,
+            source: "runtime-reply",
+            reason: "empty-session-provenance",
+            originalLength: content.length,
+          });
+          api.logger.info(
+            `${PLUGIN_NAME}: message_sending CANCEL-EMPTY-PROVENANCE-RUNTIME-REPLY (channel=${channel}, original_len=${content.length})`,
+          );
+          return { cancel: true };
+        }
 
         const heartbeatRendered = takeHeartbeatRender(_heartbeatRender, sessionKey, conversationId);
         if (heartbeatRendered) {

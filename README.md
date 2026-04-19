@@ -79,7 +79,7 @@ The package is practical rather than decorative:
 
 Questions, feedback, and implementation discussion:
 
-- `aderobot666@gmail.com`
+- `adarobot@gmail.com`
 
 If this package helps and you want to keep improvements and maintenance moving,
 please star the repository on GitHub.
@@ -249,7 +249,7 @@ If you want a one-line package fetch through npm without waiting for a public np
 registry publish, install directly from the GitHub repository:
 
 ```bash
-npm install github:redwakame/openclaw-continuity#v2.0.0
+npm install github:redwakame/openclaw-continuity#v2.0.1
 ```
 
 This fetches the release source through npm's GitHub transport path.
