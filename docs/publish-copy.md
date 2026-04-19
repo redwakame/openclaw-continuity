@@ -51,7 +51,7 @@ Technical package / slug:
 
 ## GitHub release title
 
-- `OpenClaw Continuity 2.0.2`
+- `OpenClaw Continuity 2.0.3`
 
 ## GitHub release notes
 

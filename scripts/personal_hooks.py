@@ -4625,7 +4625,7 @@ def _promote_expired_staging_to_hook(record: dict, now_dt: datetime) -> Optional
     hook = build_hook(
         hook_type,
         now_dt + timedelta(minutes=max(int(delay_minutes), 1)),
-        f"[staging-promoted] {summary}",
+        summary,
         payload={
             "event_kind": event_kind,
             "event_chain": record.get("event_chain"),
@@ -5388,6 +5388,7 @@ def strip_internal_residue_lines(text: str) -> str:
 # render template interpolation.
 _INTERNAL_RENDER_LABEL_RE = re.compile(
     r"(?:"
+    r"\[(?:staging-promoted(?:-on-expiry)?|staging-expired|staging-reactivated)[^\]]*\]\s*"
     r"\[incident:[^\]]*\]\s*"                          # [incident:INC-xxx]
     r"|新session[開开]始[，,;；\s]*"                     # 新session開始，
     r"|hook[_\s]?判[断斷][錯错]?[误誤]?[，,;；\s]*"       # hook判断錯誤，
