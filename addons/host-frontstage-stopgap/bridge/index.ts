@@ -8,11 +8,30 @@
  */
 
 import { execFileSync } from "child_process";
-import { appendFileSync, existsSync, mkdirSync } from "fs";
+import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import { join } from "path";
 
 const PLUGIN_NAME = "personal-hooks-bridge";
 const FRONTSTAGE_BRIDGE_AUDIT_FILE = "frontstage_bridge_audit.jsonl";
+
+type SkillCommandSuccess = { ok: true; raw: string };
+type SkillCommandFailureKind = "timeout" | "nonzero-exit" | "empty-output" | "unknown-exec-error";
+type SkillCommandFailure = {
+  ok: false;
+  kind: SkillCommandFailureKind;
+  message?: string;
+  status?: number | null;
+  signal?: string | null;
+  raw?: string;
+};
+type SkillCommandResult = SkillCommandSuccess | SkillCommandFailure;
+type HeartbeatRenderSuccess = { ok: true; data: { decision: string; reason?: string; rendered_text: string } };
+type HeartbeatRenderFailure = SkillCommandFailure | { ok: false; kind: "invalid-json"; message?: string; raw?: string };
+type HeartbeatRenderResult = HeartbeatRenderSuccess | HeartbeatRenderFailure;
+
+function compactLogText(text: string, limit = 160): string {
+  return (text || "").replace(/\s+/gu, " ").trim().slice(0, limit);
+}
 
 // ── Cross-version safe hook registration ──
 function safeOn(api: any, hookName: string, handler: Function, opts?: any): boolean {
@@ -59,17 +78,82 @@ function appendFrontstageBridgeAudit(dataDir: string, entry: Record<string, unkn
   }
 }
 
-function runSkillCommand(script: string, args: string[], env: Record<string, string>, timeoutMs = 4000): string | null {
+type CronJobRuntimeDescriptor = {
+  suppressAssistantTranscript: boolean;
+};
+
+function buildCronJobRuntimeIndex(stateDir: string): Map<string, CronJobRuntimeDescriptor> {
+  const index = new Map<string, CronJobRuntimeDescriptor>();
+  const jobsPath = join(stateDir, "cron", "jobs.json");
+  if (!existsSync(jobsPath)) return index;
   try {
-    return execFileSync("python3", [script, ...args], {
+    const parsed = JSON.parse(readFileSync(jobsPath, "utf-8"));
+    const jobs = Array.isArray(parsed?.jobs) ? parsed.jobs : [];
+    for (const job of jobs) {
+      if (!job || typeof job !== "object") continue;
+      const id = typeof job.id === "string" ? job.id.trim() : "";
+      if (!id) continue;
+      const delivery = job.delivery && typeof job.delivery === "object" ? job.delivery : {};
+      const mode = typeof delivery.mode === "string" ? delivery.mode.trim().toLowerCase() : "";
+      const sessionTarget = typeof job.sessionTarget === "string" ? job.sessionTarget.trim().toLowerCase() : "";
+      if (mode === "none" && sessionTarget === "isolated") {
+        index.set(id, { suppressAssistantTranscript: true });
+      }
+    }
+  } catch {
+    return index;
+  }
+  return index;
+}
+
+function runSkillCommandResult(script: string, args: string[], env: Record<string, string>, timeoutMs = 4000): SkillCommandResult {
+  try {
+    const raw = execFileSync("python3", [script, ...args], {
       encoding: "utf-8",
       timeout: timeoutMs,
       env: { ...process.env, ...env },
       stdio: ["pipe", "pipe", "pipe"],
     }).trim();
-  } catch {
-    return null;
+    if (!raw) return { ok: false, kind: "empty-output" };
+    return { ok: true, raw };
+  } catch (err: any) {
+    const stdout =
+      typeof err?.stdout === "string"
+        ? err.stdout
+        : Buffer.isBuffer(err?.stdout)
+          ? err.stdout.toString("utf-8")
+          : "";
+    const stderr =
+      typeof err?.stderr === "string"
+        ? err.stderr
+        : Buffer.isBuffer(err?.stderr)
+          ? err.stderr.toString("utf-8")
+          : "";
+    const message = compactLogText(stderr || stdout || String(err?.message || ""));
+    if (err?.code === "ETIMEDOUT" || err?.killed === true) {
+      return {
+        ok: false,
+        kind: "timeout",
+        message,
+        status: typeof err?.status === "number" ? err.status : null,
+        signal: typeof err?.signal === "string" ? err.signal : null,
+        raw: compactLogText(stdout || stderr, 240),
+      };
+    }
+    return {
+      ok: false,
+      kind: "nonzero-exit",
+      message,
+      status: typeof err?.status === "number" ? err.status : null,
+      signal: typeof err?.signal === "string" ? err.signal : null,
+      raw: compactLogText(stdout || stderr, 240),
+    };
   }
+}
+
+function runSkillCommand(script: string, args: string[], env: Record<string, string>, timeoutMs = 4000): string | null {
+  const result = runSkillCommandResult(script, args, env, timeoutMs);
+  return result.ok ? result.raw : null;
 }
 
 function stripInternalPlanningPreamble(text: string): string {
@@ -374,27 +458,252 @@ function looksLikeUserFacingHeartbeatText(text: string): boolean {
   return hasAddressee && hasCareIntent;
 }
 
+function isCronSession(ctx: any): boolean {
+  const sessionKey = typeof ctx?.sessionKey === "string" ? ctx.sessionKey.trim() : "";
+  return sessionKey.includes(":cron:");
+}
+
 function frontstageGuardSourceForText(ctx: any, text: string, fallback = "runtime-reply"): string {
   if (isHeartbeatSession(ctx)) return "heartbeat-send";
   return fallback;
 }
 
-function runHeartbeatRender(script: string, env: Record<string, string>, commit = false): { decision: string; reason?: string; rendered_text: string } | null {
+function cronSessionJobId(ctx: any): string {
+  const sessionKey = typeof ctx?.sessionKey === "string" ? ctx.sessionKey.trim() : "";
+  const match = sessionKey.match(/:cron:([^:]+)$/);
+  return match?.[1]?.trim() || "";
+}
+
+function cronSessionRuntimeDescriptor(index: Map<string, CronJobRuntimeDescriptor>, ctx: any): CronJobRuntimeDescriptor | null {
+  const jobId = cronSessionJobId(ctx);
+  if (!jobId) return null;
+  return index.get(jobId) || null;
+}
+
+function stripAssistantVisibleText(message: any): any | null {
+  if (!message || typeof message !== "object" || message.role !== "assistant") return null;
+  const content = Array.isArray(message.content) ? message.content : null;
+  if (!content) return null;
+  let changed = false;
+  const sanitized = [];
+  for (const part of content) {
+    if (part?.type === "text" && typeof part?.text === "string" && part.text.trim().length > 0) {
+      changed = true;
+      continue;
+    }
+    sanitized.push(part);
+  }
+  if (!changed) return null;
+  return { ...message, content: sanitized };
+}
+
+function scrubCronSessionTranscript(stateDir: string, sessionId: string): boolean {
+  const id = typeof sessionId === "string" ? sessionId.trim() : "";
+  if (!id) return false;
+  const sessionPath = join(stateDir, "agents", "main", "sessions", `${id}.jsonl`);
+  if (!existsSync(sessionPath)) return false;
+  try {
+    const original = readFileSync(sessionPath, "utf-8");
+    const trailingNewline = original.endsWith("\n");
+    const rewritten = original
+      .split(/\r?\n/)
+      .map((line) => {
+        if (!line.trim()) return line;
+        try {
+          const parsed = JSON.parse(line);
+          const message = parsed?.type === "message" ? parsed?.message : null;
+          if (!message || message.role !== "assistant" || !Array.isArray(message.content)) return line;
+          const sanitizedContent = message.content.filter((part: any) => part?.type !== "thinking");
+          if (sanitizedContent.length === message.content.length) return line;
+          parsed.message = { ...message, content: sanitizedContent };
+          return JSON.stringify(parsed);
+        } catch {
+          return line;
+        }
+      })
+      .join("\n");
+    if (rewritten === original) return false;
+    writeFileSync(sessionPath, trailingNewline ? `${rewritten}\n` : rewritten, "utf-8");
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function scrubCronSessionIndex(stateDir: string, sessionKey: string, sessionId: string): boolean {
+  const key = typeof sessionKey === "string" ? sessionKey.trim() : "";
+  const id = typeof sessionId === "string" ? sessionId.trim() : "";
+  const sessionsIndexPath = join(stateDir, "agents", "main", "sessions", "sessions.json");
+  if (!existsSync(sessionsIndexPath)) return false;
+  try {
+    const parsed = JSON.parse(readFileSync(sessionsIndexPath, "utf-8"));
+    let changed = false;
+    const visit = (node: any, nodeKey = ""): void => {
+      if (!node || typeof node !== "object") return;
+      if (Array.isArray(node)) {
+        for (const item of node) visit(item, nodeKey);
+        return;
+      }
+      const matchesKey =
+        key &&
+        (
+          nodeKey === key ||
+          nodeKey.startsWith(`${key}:`) ||
+          (typeof node.sessionKey === "string" && node.sessionKey.trim() === key)
+        );
+      const matchesId = id && typeof node.sessionId === "string" && node.sessionId.trim() === id;
+      const heartbeatText =
+        typeof node.lastHeartbeatText === "string" ? node.lastHeartbeatText.trim() : "";
+      const internalHeartbeatScope =
+        /^agent:main:main(?::heartbeat)?$/u.test(nodeKey) ||
+        /:cron:/u.test(nodeKey) ||
+        /:run:/u.test(nodeKey) ||
+        /:heartbeat$/u.test(nodeKey);
+      const shouldClearHeartbeatState =
+        Boolean(heartbeatText) &&
+        (
+          internalHeartbeatScope ||
+          matchesKey ||
+          matchesId ||
+          !looksLikeUserFacingHeartbeatText(heartbeatText)
+        );
+      if (shouldClearHeartbeatState) {
+        delete node.lastHeartbeatText;
+        changed = true;
+        if (node.lastHeartbeatSentAt != null) {
+          delete node.lastHeartbeatSentAt;
+          changed = true;
+        }
+      }
+      for (const [childKey, value] of Object.entries(node)) {
+        visit(value, typeof childKey === "string" ? childKey : "");
+      }
+    };
+    visit(parsed);
+    if (!changed) return false;
+    writeFileSync(sessionsIndexPath, `${JSON.stringify(parsed, null, 2)}\n`, "utf-8");
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function resolveLatestSessionIdForKey(stateDir: string, sessionKey: string): string {
+  const key = typeof sessionKey === "string" ? sessionKey.trim() : "";
+  if (!key) return "";
+  const sessionsIndexPath = join(stateDir, "agents", "main", "sessions", "sessions.json");
+  if (!existsSync(sessionsIndexPath)) return "";
+  try {
+    const parsed = JSON.parse(readFileSync(sessionsIndexPath, "utf-8"));
+    const candidates: Array<{ sessionId: string; ts: number }> = [];
+    const visit = (node: any): void => {
+      if (!node || typeof node !== "object") return;
+      if (typeof node.sessionKey === "string" && node.sessionKey.trim() === key && typeof node.sessionId === "string") {
+        const tsCandidate = Number(node.generatedAt ?? node.updatedAt ?? 0);
+        candidates.push({
+          sessionId: node.sessionId.trim(),
+          ts: Number.isFinite(tsCandidate) ? tsCandidate : 0,
+        });
+      }
+      if (Array.isArray(node)) {
+        for (const item of node) visit(item);
+        return;
+      }
+      for (const value of Object.values(node)) visit(value);
+    };
+    visit(parsed);
+    candidates.sort((a, b) => b.ts - a.ts);
+    return candidates[0]?.sessionId || "";
+  } catch {
+    return "";
+  }
+}
+
+function scheduleCronSessionTranscriptScrub(
+  timers: Map<string, ReturnType<typeof setTimeout>>,
+  api: any,
+  stateDir: string,
+  sessionKey: string,
+  sessionId: string,
+): void {
+  const key = typeof sessionKey === "string" ? sessionKey.trim() : "";
+  const id = typeof sessionId === "string" ? sessionId.trim() : "";
+  if (!key && !id) return;
+  const timerKey = key || id;
+  const existing = timers.get(timerKey);
+  if (existing) clearTimeout(existing);
+  let attempts = 0;
+  const maxAttempts = 20;
+  const probe = () => {
+    const resolvedSessionId = id || resolveLatestSessionIdForKey(stateDir, key);
+    const transcriptChanged = resolvedSessionId ? scrubCronSessionTranscript(stateDir, resolvedSessionId) : false;
+    const indexChanged = scrubCronSessionIndex(stateDir, key, resolvedSessionId);
+    if (transcriptChanged || indexChanged) {
+      timers.delete(timerKey);
+      if (transcriptChanged && resolvedSessionId) {
+        api.logger.info(`${PLUGIN_NAME}: cron_transcript SCRUB-THINKING (session=${resolvedSessionId})`);
+      }
+      if (indexChanged) {
+        api.logger.info(`${PLUGIN_NAME}: cron_session_index CLEAR-HEARTBEAT-TEXT (session=${resolvedSessionId || "unknown"}, key=${key || "unknown"})`);
+      }
+      return;
+    }
+    attempts += 1;
+    if (attempts >= maxAttempts) {
+      timers.delete(timerKey);
+      return;
+    }
+    const nextTimer = setTimeout(probe, 500);
+    timers.set(timerKey, nextTimer);
+  };
+  const timer = setTimeout(probe, 500);
+  timers.set(timerKey, timer);
+}
+
+function runHeartbeatDecision(script: string, env: Record<string, string>): { decision: string; reason?: string } | null {
   const now = new Date().toISOString();
-  const args = ["heartbeat-render", "--timestamp", now];
-  if (commit) args.push("--commit");
-  const raw = runSkillCommand(script, args, env, 5000);
+  const raw = runSkillCommand(script, ["heartbeat-decision", "--timestamp", now], env, 5000);
   if (!raw) return null;
   try {
     const data = JSON.parse(raw);
     return {
       decision: typeof data?.decision === "string" ? data.decision : "internal_noop",
       reason: typeof data?.reason === "string" ? data.reason : undefined,
-      rendered_text: typeof data?.rendered_text === "string" ? data.rendered_text.trim() : "",
     };
   } catch {
     return null;
   }
+}
+
+function runHeartbeatRenderDetailed(script: string, env: Record<string, string>, commit = false): HeartbeatRenderResult {
+  const now = new Date().toISOString();
+  const args = ["heartbeat-render", "--timestamp", now];
+  if (commit) args.push("--commit");
+  const result = runSkillCommandResult(script, args, env, 15000);
+  if (!result.ok) return result;
+  try {
+    const data = JSON.parse(result.raw);
+    return {
+      ok: true,
+      data: {
+        decision: typeof data?.decision === "string" ? data.decision : "internal_noop",
+        reason: typeof data?.reason === "string" ? data.reason : undefined,
+        rendered_text: typeof data?.rendered_text === "string" ? data.rendered_text.trim() : "",
+      },
+    };
+  } catch (err: any) {
+    return {
+      ok: false,
+      kind: "invalid-json",
+      message: compactLogText(String(err?.message || err || "")),
+      raw: compactLogText(result.raw, 240),
+    };
+  }
+}
+
+function runHeartbeatRender(script: string, env: Record<string, string>, commit = false): { decision: string; reason?: string; rendered_text: string } | null {
+  const result = runHeartbeatRenderDetailed(script, env, commit);
+  return result.ok ? result.data : null;
 }
 
 function runCommitmentCapture(
@@ -1168,6 +1477,7 @@ export default {
 
     const dataDir = join(stateDir, "workspace", "personal-hooks");
     const configPath = process.env.OPENCLAW_CONFIG_PATH || join(stateDir, "openclaw.json");
+    const cronJobRuntimeIndex = buildCronJobRuntimeIndex(stateDir);
     const configuredLocale = (process.env.PERSONAL_HOOKS_LOCALE || "").trim();
     const skillEnv = {
       PERSONAL_HOOKS_DATA_DIR: dataDir,
@@ -1257,6 +1567,7 @@ export default {
     const _heartbeatRender = new Map<string, HeartbeatRenderEntry>();
     const _deliveryAck = new Map<string, DeliveryAckEntry>();
     const _deliveryAckTimers = new Map<string, ReturnType<typeof setTimeout>>();
+    const _cronTranscriptScrubTimers = new Map<string, ReturnType<typeof setTimeout>>();
 
     hookResults["before_message_write"] = safeOn(
       api,
@@ -1266,6 +1577,21 @@ export default {
           markBmwUserTurn(_bmwFallbackGate, typeof ctx?.sessionKey === "string" ? ctx.sessionKey : "");
           api.logger.info(`${PLUGIN_NAME}: before_message_write SUPPRESS-INTERNAL-USER-MSG (session=${ctx?.sessionKey || "unknown"})`);
           return { message: { ...(event?.message || {}), role: "user", content: [] } };
+        }
+        const cronRuntime = cronSessionRuntimeDescriptor(cronJobRuntimeIndex, ctx);
+        if (cronRuntime?.suppressAssistantTranscript) {
+          scheduleCronSessionTranscriptScrub(
+            _cronTranscriptScrubTimers,
+            api,
+            stateDir,
+            typeof ctx?.sessionKey === "string" ? ctx.sessionKey : "",
+            typeof ctx?.sessionId === "string" ? ctx.sessionId : "",
+          );
+          const strippedCronAssistant = stripAssistantVisibleText(event?.message);
+          if (strippedCronAssistant) {
+            api.logger.info(`${PLUGIN_NAME}: before_message_write CRON-SUPPRESS-ASSISTANT-TEXT (session=${ctx?.sessionKey || "unknown"})`);
+            return { message: strippedCronAssistant };
+          }
         }
         if (isHeartbeatSession(ctx)) {
           const message = event?.message || {};
@@ -1281,10 +1607,35 @@ export default {
           if (heartbeatToolUsePhase) {
             return { message: { ...message, role: "assistant", content: [] } };
           }
-          const rendered = runHeartbeatRender(script, skillEnv, true);
+          const renderedResult = runHeartbeatRenderDetailed(script, skillEnv, true);
+          const rendered = renderedResult.ok ? renderedResult.data : null;
           rememberHeartbeatRender(_heartbeatRender, sessionKey, conversationId, rendered);
-          if (!rendered) {
-            api.logger.info(`${PLUGIN_NAME}: before_message_write HEARTBEAT_SUPPRESS (decision=unknown, reason=render-failed)`);
+          if (!renderedResult.ok) {
+            const renderReason = renderedResult.kind === "timeout"
+              ? "render-timeout"
+              : renderedResult.kind === "invalid-json"
+                ? "render-invalid-json"
+                : renderedResult.kind === "empty-output"
+                  ? "render-empty-output"
+                  : "render-exec-failed";
+            const statusPart = "status" in renderedResult && renderedResult.status != null ? `, status=${renderedResult.status}` : "";
+            const signalPart = "signal" in renderedResult && renderedResult.signal ? `, signal=${renderedResult.signal}` : "";
+            const detailPart = renderedResult.message ? `, detail=${renderedResult.message}` : "";
+            api.logger.warn(
+              `${PLUGIN_NAME}: heartbeat-render failure (reason=${renderReason}${statusPart}${signalPart}${detailPart})`,
+            );
+            const decisionOnly = renderedResult.kind === "timeout" ? null : runHeartbeatDecision(script, skillEnv);
+            if (decisionOnly) {
+              const reason =
+                decisionOnly.decision === "none" || decisionOnly.decision === "internal_noop"
+                  ? (decisionOnly.reason || "unknown")
+                  : renderReason;
+              api.logger.info(
+                `${PLUGIN_NAME}: before_message_write HEARTBEAT_SUPPRESS (decision=${decisionOnly.decision}, reason=${reason})`,
+              );
+            } else {
+              api.logger.info(`${PLUGIN_NAME}: before_message_write HEARTBEAT_SUPPRESS (decision=unknown, reason=${renderReason})`);
+            }
             return { message: { ...(event?.message || {}), role: "assistant", content: [] } };
           }
           if (!rendered.rendered_text) {
