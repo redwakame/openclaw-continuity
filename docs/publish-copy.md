@@ -217,6 +217,7 @@ please star the GitHub repository.
 
 ## npm package summary
 
+- Package name: `@redwakame-skill/openclaw-continuity`
 - EN: Host-neutral OpenClaw continuity skill with time-aware carryover, staged memory, tracked events, natural-language setting changes, and structured daily-memory writeback.
 - 中文：host-neutral 的 OpenClaw 延續技能包，提供時間感、`/new` 接回、暫存記憶、正式追蹤、口語改設定與結構化記憶寫回。
 

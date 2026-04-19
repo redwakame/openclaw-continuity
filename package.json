@@ -1,5 +1,5 @@
 {
-  "name": "@openclaw-skill/personal-hooks",
+  "name": "@redwakame-skill/openclaw-continuity",
   "version": "2.0.0",
   "private": false,
   "description": "OpenClaw Continuity is a time-aware continuity and follow-up skill package with /new carryover, staged memory, tracked events, natural-language setting changes, and structured writeback.",
@@ -16,6 +16,9 @@
     "url": "https://github.com/redwakame/openclaw-continuity/issues"
   },
   "homepage": "https://github.com/redwakame/openclaw-continuity#readme",
+  "publishConfig": {
+    "access": "public"
+  },
   "engines": {
     "node": ">=18"
   },
