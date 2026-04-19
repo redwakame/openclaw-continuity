@@ -51,7 +51,7 @@ Technical package / slug:
 
 ## GitHub release title
 
-- `OpenClaw Continuity 2.0.1`
+- `OpenClaw Continuity 2.0.2`
 
 ## GitHub release notes
 
@@ -182,7 +182,7 @@ It is built for agents that need:
 
 This skill is designed for agents that should remember, care, and follow up without letting internal state leak into frontstage chat.
 
-Contact: `adarobot@gmail.com`
+Contact: `adarobot666@gmail.com`
 
 If this skill helps and you want to keep updates and maintenance moving,
 please star the GitHub repository.
@@ -210,7 +210,7 @@ please star the GitHub repository.
 
 這個技能適合那些需要「記得、關心、追蹤」，但又不能把正常聊天搞亂的 agent。
 
-聯絡與回饋：`adarobot@gmail.com`
+聯絡與回饋：`adarobot666@gmail.com`
 
 如果這個技能對你有幫助，而且你也期待它持續優化與維護，歡迎在 GitHub
 給一顆星，這會是最直接的支持。
@@ -225,4 +225,4 @@ please star the GitHub repository.
 
 Questions, feedback, and implementation discussion:
 
-- `adarobot@gmail.com`
+- `adarobot666@gmail.com`

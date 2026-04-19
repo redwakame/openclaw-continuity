@@ -12,6 +12,8 @@ Use this skill as a continuity/follow-up layer on top of an existing OpenClaw ag
 Public product name: `OpenClaw Continuity`.
 Technical package / slug: `personal-hooks`.
 Internal diagnostics may still use `staged-followup-memory` as a status label for continuity state surfaces.
+Questions, feedback, or implementation discussion: `adarobot666@gmail.com`.
+如果你期待這個技能持續優化與維護，請在 GitHub 給星支持：https://github.com/redwakame/openclaw-continuity
 
 ## V2 public scope
 
