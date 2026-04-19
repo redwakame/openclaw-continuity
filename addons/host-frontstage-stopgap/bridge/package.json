@@ -1,6 +1,6 @@
 {
   "name": "personal-hooks-bridge",
-  "version": "2.0.3",
+  "version": "2.0.5",
   "description": "Optional host-side OpenClaw bridge addon for frontstage leak suppression.",
   "type": "module",
   "main": "index.ts",

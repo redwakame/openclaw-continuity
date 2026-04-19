@@ -12968,7 +12968,7 @@ def _summary_contains_raw_json(text: str) -> bool:
     json_markers = ('{"sender_label"', '{"event_kind"', '{"body":', '{"text":', '{"hook_id":', '{"source":', '{"type":')
     if any(marker in text for marker in json_markers):
         return True
-    # Untrusted metadata prefix (e.g., from Telegram reply context)
+    # Untrusted metadata prefix (e.g., from a reply-context wrapper)
     for prefix in UNTRUSTED_SUMMARY_PREFIXES:
         if prefix in text:
             return True
@@ -14897,14 +14897,62 @@ def classify_new_session_anchor(
     return candidates[0]
 
 
-def dispatch_context_matches_current_turn(context: Optional[dict], user_text: str) -> bool:
+_DISPATCH_RECALL_TIME_RE = re.compile(r"\b(?:[01]?\d|2[0-3]):[0-5]\d\b")
+_DISPATCH_RECALL_IMAGE_RE = re.compile(
+    r"(?:截圖|截图|screenshot|圖片|图片|照片|相片|看圖|看图).{0,16}(?:訊息|消息|內容|内容|時間|时间|說了什麼|说了什么|發了什麼|发了什么|傳了什麼|传了什么)",
+    re.I,
+)
+_DISPATCH_RECALL_TEXT_RE = re.compile(
+    r"(?:你|妳|我).{0,12}(?:剛剛|刚刚|前面|那些|哪幾|哪几|20:|21:|22:|23:).{0,24}(?:發了什麼|发了什么|傳了什麼|传了什么|說了什麼|说了什么|訊息|消息|內容|内容)",
+    re.I,
+)
+_DISPATCH_EVIDENCE_REQUEST_RE = re.compile(
+    r"(?:截圖|截图|screenshot|圖片|图片|給我看|给我看|確認|确认).{0,24}(?:那則|那条|消息|訊息|內容|内容|發了什麼|发了什么|說了什麼|说了什么|我到底打了什麼|我到底打了什么)",
+    re.I,
+)
+
+
+def _user_text_looks_like_dispatch_recall(user_text: str) -> bool:
+    sample = str(user_text or "").strip()
+    if not sample:
+        return False
+    if _DISPATCH_RECALL_IMAGE_RE.search(sample):
+        return True
+    if _DISPATCH_RECALL_TEXT_RE.search(sample):
+        return True
+    if len(_DISPATCH_RECALL_TIME_RE.findall(sample)) >= 2 and re.search(r"(?:訊息|消息|內容|内容|發|传|傳|說|说)", sample, re.I):
+        return True
+    return False
+
+
+def recent_session_requests_dispatch_evidence(session_key: Optional[str]) -> bool:
+    key = str(session_key or "").strip()
+    if not is_anchor_eligible_session_key(key):
+        return False
+    turns = extract_recent_session_turns(key, limit_turns=4)
+    if not turns:
+        return False
+    recent_assistant = [str(item.get("text") or "").strip() for item in turns[-4:] if item.get("role") == "assistant"]
+    recent_user = [str(item.get("text") or "").strip() for item in turns[-4:] if item.get("role") == "user"]
+    for text in recent_assistant:
+        if _DISPATCH_EVIDENCE_REQUEST_RE.search(text):
+            return True
+    for text in recent_user:
+        if _user_text_looks_like_dispatch_recall(text):
+            return True
+    return False
+
+
+def dispatch_context_matches_current_turn(context: Optional[dict], user_text: str, session_key: Optional[str] = None) -> bool:
     if not isinstance(context, dict):
         return False
     normalized_user = normalize_text_for_match(user_text or "")
-    if not normalized_user:
-        return False
     if user_explicitly_requests_pending_recall(user_text):
         return True
+    if _user_text_looks_like_dispatch_recall(user_text):
+        return True
+    if not normalized_user:
+        return recent_session_requests_dispatch_evidence(session_key)
     card = context.get("card") if isinstance(context.get("card"), dict) else {}
     source_topic = str(card.get("source_topic") or "")
     event_summary = str(card.get("event_summary") or "")
@@ -19578,7 +19626,7 @@ def build_runtime_context(session_id: str, session_key: str, user_text: str, now
     )
     _dispatch_context = latest_dispatch_context(hook_store, now_dt=now_dt) if not heartbeat_session and not effective_new_session else None
     dispatch_awareness_prompt = ""
-    if allow_structured_dialogue_context and _dispatch_context and dispatch_context_matches_current_turn(_dispatch_context, user_text):
+    if allow_structured_dialogue_context and _dispatch_context and dispatch_context_matches_current_turn(_dispatch_context, user_text, session_key=session_key):
         dispatch_awareness_prompt = build_dispatch_awareness_prompt(hook_store, now_dt=now_dt)
     # ── A-final-stable: cross-channel dedup — if dispatch awareness and pending topics
     #    reference the same hook, suppress the dispatch awareness prompt
@@ -20350,34 +20398,61 @@ def dispatch_awareness_horizon_hours(hook: dict) -> float:
     return 12.0
 
 
-def latest_dispatch_context(hook_store: dict, now_dt: Optional[datetime] = None) -> Optional[dict]:
+def recent_dispatch_contexts(hook_store: dict, now_dt: Optional[datetime] = None, limit: int = 4) -> list[dict]:
     now_dt = now_dt or now_local()
-    latest_hook = latest_dispatched_hook(hook_store)
-    hook_context = None
-    if isinstance(latest_hook, dict):
-        dispatched_at = parse_optional_dt(latest_hook.get("last_dispatched_at"))
-        if dispatched_at is not None and (now_dt - dispatched_at).total_seconds() / 3600 <= dispatch_awareness_horizon_hours(latest_hook):
-            payload = latest_hook.get("payload") if isinstance(latest_hook.get("payload"), dict) else {}
-            hook_context = {
+    contexts = []
+    hooks = hook_store.get("hooks") if isinstance(hook_store.get("hooks"), list) else []
+    for hook in hooks:
+        if not isinstance(hook, dict):
+            continue
+        dispatched_at = parse_optional_dt(hook.get("last_dispatched_at"))
+        if dispatched_at is None:
+            continue
+        if (now_dt - dispatched_at).total_seconds() / 3600 > dispatch_awareness_horizon_hours(hook):
+            continue
+        payload = hook.get("payload") if isinstance(hook.get("payload"), dict) else {}
+        contexts.append(
+            {
                 "kind": "hook",
                 "dispatched_at": dispatched_at,
-                "still_pending": str(latest_hook.get("status") or "unknown") in ("pending", "dispatched"),
-                "card": payload.get("dispatch_reason_card") if isinstance(payload.get("dispatch_reason_card"), dict) else build_dispatch_reason_card(latest_hook, now_dt=now_dt),
+                "still_pending": str(hook.get("status") or "unknown") in ("pending", "dispatched"),
+                "card": payload.get("dispatch_reason_card") if isinstance(payload.get("dispatch_reason_card"), dict) else build_dispatch_reason_card(hook, now_dt=now_dt),
             }
+        )
     heartbeat_snapshot = latest_heartbeat_dispatch_snapshot(now_dt)
-    heartbeat_context = None
     if isinstance(heartbeat_snapshot, dict):
-        heartbeat_context = {
+        contexts.append(
+            {
             "kind": "heartbeat",
             "dispatched_at": heartbeat_snapshot.get("sent_dt"),
             "still_pending": True,
             "card": build_heartbeat_dispatch_card(heartbeat_snapshot),
-        }
-    candidates = [item for item in (hook_context, heartbeat_context) if isinstance(item, dict) and isinstance(item.get("dispatched_at"), datetime)]
-    if not candidates:
-        return None
-    candidates.sort(key=lambda item: item.get("dispatched_at"), reverse=True)
-    return candidates[0]
+            }
+        )
+    contexts = [item for item in contexts if isinstance(item, dict) and isinstance(item.get("dispatched_at"), datetime)]
+    clean = []
+    seen_keys = set()
+    for item in sorted(contexts, key=lambda item: item.get("dispatched_at"), reverse=True):
+        if _dispatch_source_is_stale(item, now_dt):
+            continue
+        card = item.get("card") if isinstance(item.get("card"), dict) else {}
+        dedup_key = (
+            item.get("kind"),
+            item.get("dispatched_at").isoformat(timespec="seconds"),
+            str(card.get("dispatched_text") or card.get("event_summary") or card.get("source_topic") or "").strip(),
+        )
+        if dedup_key in seen_keys:
+            continue
+        seen_keys.add(dedup_key)
+        clean.append(item)
+        if len(clean) >= max(1, limit):
+            break
+    return clean
+
+
+def latest_dispatch_context(hook_store: dict, now_dt: Optional[datetime] = None) -> Optional[dict]:
+    contexts = recent_dispatch_contexts(hook_store, now_dt=now_dt, limit=1)
+    return contexts[0] if contexts else None
 
 
 def _dispatch_source_is_stale(context: dict, now_dt: datetime) -> bool:
@@ -20414,12 +20489,10 @@ def build_dispatch_awareness_prompt(hook_store: dict, now_dt: Optional[datetime]
     """
     if now_dt is None:
         now_dt = now_local()
-    context = latest_dispatch_context(hook_store, now_dt=now_dt)
-    if not isinstance(context, dict):
+    contexts = recent_dispatch_contexts(hook_store, now_dt=now_dt, limit=4)
+    if not contexts:
         return ""
-    # ── Stale/polluted dispatch filter ──
-    if _dispatch_source_is_stale(context, now_dt):
-        return ""
+    context = contexts[0]
     dispatched_at = context.get("dispatched_at")
     card = context.get("card") if isinstance(context.get("card"), dict) else {}
     still_pending = bool(context.get("still_pending"))
@@ -20448,6 +20521,17 @@ def build_dispatch_awareness_prompt(hook_store: dict, now_dt: Optional[datetime]
         lines.append("If the user responds to this topic, continue the dispatched thread naturally.")
     else:
         lines.append("This dispatch has been handled. Only reference it if the user brings it up.")
+    if len(contexts) > 1:
+        lines.append("- recent_dispatches:")
+        for item in contexts:
+            item_card = item.get("card") if isinstance(item.get("card"), dict) else {}
+            item_dt = item.get("dispatched_at")
+            item_time = str(item_card.get("dispatch_time") or (item_dt.isoformat(timespec="seconds") if isinstance(item_dt, datetime) else "")).strip()
+            item_topic = str(item_card.get("source_topic") or "").strip() or "recent thread"
+            item_text = str(item_card.get("dispatched_text") or item_card.get("event_summary") or "").strip()
+            item_text = trim_summary(item_text, 90)
+            pending_flag = "pending" if item.get("still_pending") else "handled"
+            lines.append(f"  - {item_time} | {item_topic} | {pending_flag} | {item_text}")
     return "\n".join(lines)
 
 
