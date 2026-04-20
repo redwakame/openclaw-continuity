@@ -1,5 +1,5 @@
 /**
- * personal-hooks-frontstage-stopgap v2.0.6 — cross-version stable
+ * personal-hooks-frontstage-stopgap v2.0.7 — cross-version stable
  *
  * Cross-version compatibility (2026.3.24 / 2026.4.5+):
  * - Gateway 2026.3.24: api.on() returns void 0 when registrationMode !== "full"
@@ -1479,7 +1479,7 @@ function sanitizeAssistantMessage(script: string, env: Record<string, string>, m
 
 export default {
   name: PLUGIN_NAME,
-  version: "2.0.6",
+  version: "2.0.7",
 
   configSchema: {
     parse(value: unknown) {
