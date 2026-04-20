@@ -1,5 +1,5 @@
 /**
- * personal-hooks-frontstage-stopgap v2.0.7 — cross-version stable
+ * personal-hooks-frontstage-stopgap v2.0.5 — cross-version stable
  *
  * Cross-version compatibility (2026.3.24 / 2026.4.5+):
  * - Gateway 2026.3.24: api.on() returns void 0 when registrationMode !== "full"
@@ -910,6 +910,19 @@ type DeliveryAckEntry = {
   conversationId: string;
 };
 
+type ApprovedTelegramSendEntry = {
+  createdAt: number;
+  content: string;
+  conversationId: string;
+};
+
+type RecentInternalLocalTranscriptEntry = {
+  createdAt: number;
+  sessionKey: string;
+  conversationId: string;
+  content: string;
+};
+
 const BMW_FALLBACK_TTL_MS = 10_000;
 const RECENT_USER_TEXT_TTL_MS = 15 * 60_000;
 const PRESERVED_RUNTIME_REPLY_TTL_MS = 30_000;
@@ -918,6 +931,8 @@ const HEARTBEAT_RENDER_TTL_MS = 30_000;
 const DELIVERY_ACK_TTL_MS = 60_000;
 const DELIVERY_ACK_POLL_MS = 1_500;
 const DELIVERY_ACK_MAX_WAIT_MS = 15_000;
+const APPROVED_TELEGRAM_SEND_TTL_MS = 30_000;
+const INTERNAL_LOCAL_TRANSCRIPT_TTL_MS = 15_000;
 const GATEWAY_LOG_TAIL_LINES = 200;
 
 function isTelegramDirectSessionKey(sessionKey: string): boolean {
@@ -928,6 +943,17 @@ function isTelegramDirectSessionKey(sessionKey: string): boolean {
 function isUserFacingTelegramDirectSession(ctx: any, sessionKey: string): boolean {
   const value = typeof sessionKey === "string" ? sessionKey.trim() : "";
   return isTelegramDirectSessionKey(value) && canUseFrontstageSessionCache(ctx, value);
+}
+
+function isInternalNonUserFacingSessionKey(sessionKey: string): boolean {
+  const value = typeof sessionKey === "string" ? sessionKey.trim() : "";
+  if (!value || isTelegramDirectSessionKey(value)) return false;
+  return (
+    value.includes(":heartbeat") ||
+    value.includes(":cron:") ||
+    value.includes(":main:main") ||
+    value.includes(":run:")
+  );
 }
 
 function looksLikeRuntimeGenericErrorText(text: string): boolean {
@@ -1273,6 +1299,7 @@ function ackLocalTranscriptDelivery(
   dataDir: string,
   script: string,
   env: Record<string, string>,
+  internalTranscriptStore: Map<string, RecentInternalLocalTranscriptEntry>,
   {
     sessionKey,
     conversationId,
@@ -1287,6 +1314,7 @@ function ackLocalTranscriptDelivery(
 ): void {
   const value = typeof content === "string" ? content.trim() : "";
   if (!value) return;
+  rememberRecentInternalLocalTranscript(internalTranscriptStore, sessionKey, conversationId, value);
   runAckDelivery(script, env, {
     sessionKey,
     content: value,
@@ -1322,6 +1350,82 @@ function buildRuntimeEmptyRecoveryText(userText: string): string {
   return questionLike
     ? "我在，剛剛這句沒接穩。你再問我一次，我接著你。"
     : "我在，剛剛這句沒接穩。你再說一次，我接著你。";
+}
+
+function approvedTelegramSendKeys(conversationId: string, content: string): string[] {
+  const conversation = typeof conversationId === "string" ? conversationId.trim() : "";
+  const value = typeof content === "string" ? content.trim() : "";
+  if (!value) return [];
+  const keys = new Set<string>();
+  if (conversation) keys.add(`conversation:${conversation}:${value}`);
+  keys.add(`content:${value}`);
+  return Array.from(keys);
+}
+
+function rememberApprovedTelegramSend(
+  store: Map<string, ApprovedTelegramSendEntry>,
+  conversationId: string,
+  content: string,
+): void {
+  const value = typeof content === "string" ? content.trim() : "";
+  if (!value) return;
+  const entry: ApprovedTelegramSendEntry = {
+    createdAt: Date.now(),
+    conversationId: typeof conversationId === "string" ? conversationId.trim() : "",
+    content: value,
+  };
+  for (const key of approvedTelegramSendKeys(conversationId, value)) {
+    store.set(key, entry);
+  }
+}
+
+function takeApprovedTelegramSend(
+  store: Map<string, ApprovedTelegramSendEntry>,
+  conversationId: string,
+  content: string,
+): ApprovedTelegramSendEntry | null {
+  for (const key of approvedTelegramSendKeys(conversationId, content)) {
+    const entry = store.get(key);
+    if (!entry) continue;
+    store.delete(key);
+    if (Date.now() - entry.createdAt > APPROVED_TELEGRAM_SEND_TTL_MS) continue;
+    return entry;
+  }
+  return null;
+}
+
+function rememberRecentInternalLocalTranscript(
+  store: Map<string, RecentInternalLocalTranscriptEntry>,
+  sessionKey: string,
+  conversationId: string,
+  content: string,
+): void {
+  const session = typeof sessionKey === "string" ? sessionKey.trim() : "";
+  const conversation = typeof conversationId === "string" ? conversationId.trim() : "";
+  const value = typeof content === "string" ? content.trim() : "";
+  if (!conversation || !value || !isInternalNonUserFacingSessionKey(session)) return;
+  store.set(`conversation:${conversation}`, {
+    createdAt: Date.now(),
+    sessionKey: session,
+    conversationId: conversation,
+    content: value,
+  });
+}
+
+function peekRecentInternalLocalTranscript(
+  store: Map<string, RecentInternalLocalTranscriptEntry>,
+  conversationId: string,
+): RecentInternalLocalTranscriptEntry | null {
+  const conversation = typeof conversationId === "string" ? conversationId.trim() : "";
+  if (!conversation) return null;
+  const key = `conversation:${conversation}`;
+  const entry = store.get(key);
+  if (!entry) return null;
+  if (Date.now() - entry.createdAt > INTERNAL_LOCAL_TRANSCRIPT_TTL_MS) {
+    store.delete(key);
+    return null;
+  }
+  return entry;
 }
 
 function recoverPreservedRuntimeReply(
@@ -1479,7 +1583,7 @@ function sanitizeAssistantMessage(script: string, env: Record<string, string>, m
 
 export default {
   name: PLUGIN_NAME,
-  version: "2.0.7",
+  version: "2.0.5",
 
   configSchema: {
     parse(value: unknown) {
@@ -1589,6 +1693,8 @@ export default {
     const _deliveryAck = new Map<string, DeliveryAckEntry>();
     const _deliveryAckTimers = new Map<string, ReturnType<typeof setTimeout>>();
     const _cronTranscriptScrubTimers = new Map<string, ReturnType<typeof setTimeout>>();
+    const _approvedTelegramSend = new Map<string, ApprovedTelegramSendEntry>();
+    const _recentInternalLocalTranscript = new Map<string, RecentInternalLocalTranscriptEntry>();
 
     hookResults["before_message_write"] = safeOn(
       api,
@@ -1663,7 +1769,7 @@ export default {
             api.logger.info(`${PLUGIN_NAME}: before_message_write HEARTBEAT_SUPPRESS (decision=${rendered.decision}, reason=${rendered.reason || "unknown"})`);
             return { message: { ...(event?.message || {}), role: "assistant", content: [] } };
           }
-          ackLocalTranscriptDelivery(api, dataDir, script, skillEnv, {
+          ackLocalTranscriptDelivery(api, dataDir, script, skillEnv, _recentInternalLocalTranscript, {
             sessionKey,
             conversationId,
             content: rendered.rendered_text,
@@ -1721,6 +1827,9 @@ export default {
           if (canCacheFrontstage) {
             rememberFrontstageReply(_frontstageReply, sessionKey, conversationId, newSessionFallback.text);
           }
+          if (isDirectTelegramSession) {
+            rememberApprovedTelegramSend(_approvedTelegramSend, conversationId, newSessionFallback.text);
+          }
           return {
             message: {
               ...(message || {}),
@@ -1746,6 +1855,9 @@ export default {
             api.logger.info(`${PLUGIN_NAME}: before_message_write NEW-SESSION-FALLBACK (session=${sessionKey || "unknown"})`);
             if (canCacheFrontstage) {
               rememberFrontstageReply(_frontstageReply, sessionKey, conversationId, newSessionFallback.text);
+            }
+            if (isDirectTelegramSession) {
+              rememberApprovedTelegramSend(_approvedTelegramSend, conversationId, newSessionFallback.text);
             }
             return {
               message: {
@@ -1781,6 +1893,7 @@ export default {
           if (canCacheFrontstage) {
             rememberFrontstageReply(_frontstageReply, sessionKey, conversationId, recoveryText);
           }
+          rememberApprovedTelegramSend(_approvedTelegramSend, conversationId, recoveryText);
           return {
             message: {
               ...(message || {}),
@@ -1853,6 +1966,7 @@ export default {
                 ? ctx.conversationId
                 : (event?.to != null ? String(event.to) : ""),
             );
+            rememberApprovedTelegramSend(_approvedTelegramSend, conversationId, originalVisibleText);
           }
           api.logger.info(
             `${PLUGIN_NAME}: before_message_write PRESERVE-ORIGINAL-AFTER-EMPTY-SANITIZE (session=${sessionKey || "unknown"})`,
@@ -1880,6 +1994,9 @@ export default {
             if (canCacheFrontstage) {
               rememberFrontstageReply(_frontstageReply, sessionKey, conversationId, newSessionFallback.text);
             }
+            if (isDirectTelegramSession) {
+              rememberApprovedTelegramSend(_approvedTelegramSend, conversationId, newSessionFallback.text);
+            }
             return {
               message: {
                 ...(message || {}),
@@ -1894,12 +2011,18 @@ export default {
             if (canCacheFrontstage) {
               rememberFrontstageReply(_frontstageReply, sessionKey, conversationId, assistantVisibleText(content));
             }
+            if (isDirectTelegramSession) {
+              rememberApprovedTelegramSend(_approvedTelegramSend, conversationId, assistantVisibleText(content));
+            }
           }
           return;
         }
         if (Array.isArray(sanitized?.content) && hasVisibleAssistantText(sanitized.content)) {
           if (canCacheFrontstage) {
             rememberFrontstageReply(_frontstageReply, sessionKey, conversationId, assistantVisibleText(sanitized.content));
+          }
+          if (isDirectTelegramSession) {
+            rememberApprovedTelegramSend(_approvedTelegramSend, conversationId, assistantVisibleText(sanitized.content));
           }
         }
         return { message: sanitized };
@@ -1942,6 +2065,32 @@ export default {
         }
         const channel = event?.metadata?.channel || ctx?.channelId || "unknown";
         const precleanedContent = stripHostFrontstageLeakage(content);
+        const approvedSessionlessTelegram =
+          channel === "telegram" && !sessionKey
+            ? takeApprovedTelegramSend(_approvedTelegramSend, conversationId, precleanedContent || content)
+            : null;
+        const recentInternalTranscript =
+          channel === "telegram" && !sessionKey
+            ? peekRecentInternalLocalTranscript(_recentInternalLocalTranscript, conversationId)
+            : null;
+
+        if (channel === "telegram" && !sessionKey && recentInternalTranscript && !approvedSessionlessTelegram) {
+          appendFrontstageBridgeAudit(dataDir, {
+            phase: "message_sending",
+            event: "cancel-unapproved-sessionless-telegram-send",
+            sessionKey,
+            channel,
+            source: "runtime-reply",
+            reason: "recent-internal-local-transcript",
+            originalLength: content.length,
+            priorSessionKey: recentInternalTranscript.sessionKey,
+            priorTranscriptLength: recentInternalTranscript.content.length,
+          });
+          api.logger.info(
+            `${PLUGIN_NAME}: message_sending CANCEL-UNAPPROVED-SESSIONLESS-TELEGRAM-SEND (channel=${channel}, original_len=${content.length}, prior_session=${recentInternalTranscript.sessionKey})`,
+          );
+          return { cancel: true };
+        }
 
         if (
           channel === "telegram" &&
@@ -2245,7 +2394,7 @@ export default {
         }
         if (!content) return;
         clearDeliveryAck(_deliveryAck, sessionKey, conversationId);
-        ackLocalTranscriptDelivery(api, dataDir, script, skillEnv, {
+        ackLocalTranscriptDelivery(api, dataDir, script, skillEnv, _recentInternalLocalTranscript, {
           sessionKey,
           conversationId,
           content,
