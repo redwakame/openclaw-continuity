@@ -3,6 +3,12 @@
 `OpenClaw Continuity` is the public product name for the `personal-hooks`
 skill package.
 
+It is built for a simple outcome:
+
+- remember the right thing
+- reconnect the right topic after `/new`
+- follow up naturally without leaking internal continuity logic into frontstage chat
+
 It adds a **state-backed continuity engine** to OpenClaw agents so they can:
 
 - keep `/new` carryover attached to the right topic
@@ -12,7 +18,8 @@ It adds a **state-backed continuity engine** to OpenClaw agents so they can:
 
 ## One-line summary
 
-Structured continuity, time-aware care, and event follow-up for OpenClaw agents.
+Make OpenClaw remember the right thing, reconnect the right topic after `/new`,
+and follow up naturally.
 
 ![OpenClaw Continuity Chinese hero](assets/publish/hero-continuity-zh.svg)
 
@@ -26,6 +33,17 @@ Structured continuity, time-aware care, and event follow-up for OpenClaw agents.
 的技能包。它不改掉 agent 的人格，也不是再堆一層 prompt，而是補上一個
 穩定、可檢查、可驗證的 continuity engine，讓日常對話、暫存話題、
 正式追蹤與主動關心能分得開，又能在需要時自然接回。
+
+使用者最直接感受到的是：
+
+- **`/new` 之後能接回正確主題**
+  - 不會一重開對話就掉回空泛寒暄
+- **「晚點再聊」真的能被暫存**
+  - 暫存話題、正式追蹤、一般聊天分得開
+- **關心與追蹤不亂追、不亂漏**
+  - 有 closure、cooldown、dedupe、dispatch cap、作息抑制
+- **設定可以直接用口語調**
+  - 不用每次都去翻設定檔
 
 它補的是現在很多 agent 最常缺的四件事：
 
@@ -45,7 +63,14 @@ staged topics, tracked follow-up, and proactive care. It is designed for
 agents that need continuity without letting internal memory logic leak into
 frontstage conversation.
 
-The package is practical rather than decorative:
+What users notice first:
+
+- `/new` reconnects the right pending topic instead of collapsing into generic small talk
+- “let's talk about it later” can stay staged instead of being forgotten
+- follow-up stays explicit with closure, cooldown, dedupe, dispatch caps, and sleep/rest suppress
+- settings can be changed through ordinary language instead of config-only control
+
+What the package provides under the hood:
 
 - keep `/new` continuity attached to the correct topic
 - keep staged and tracked follow-up explicit and inspectable
@@ -114,6 +139,12 @@ python3 /path/to/openclaw-workspace/skills/personal-hooks/scripts/followup_skill
 
 Expected result: the harness completes cleanly and the skill creates state
 under the host workspace, not inside this package root.
+
+Quick behavior check:
+
+1. tell the agent to remember or track something for later
+2. start `/new`
+3. verify that it reconnects the right pending topic instead of resetting into generic chat
 
 ## Read this first
 

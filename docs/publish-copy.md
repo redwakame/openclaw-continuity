@@ -102,18 +102,18 @@ turning ordinary conversation into noisy system chatter.
 
 ## ClawHub short description
 
-- EN: Time-aware continuity and follow-up for OpenClaw agents with staged memory, `/new` carryover, tracked events, natural-language setting changes, and frontstage-safe writeback.
-- 中文：提供時間感、暫存記憶、正式追蹤、`/new` 接回、口語改設定與前台安全寫回的 OpenClaw 延續技能。
+- EN: Make OpenClaw remember the right thing, reconnect the right topic after `/new`, and follow up naturally without leaking internal continuity logic into chat.
+- 中文：讓 OpenClaw 記住對的事、在 `/new` 後接回正確主題，並自然追蹤而不把內部 continuity 邏輯漏到前台對話。
 
 ## ClawHub longer description
 
 - EN:
-  - Use `OpenClaw Continuity` when an OpenClaw agent needs a reliable continuity layer between ordinary chat, staged memory, and tracked follow-up.
-  - The package keeps carryover, closure, cooldown, sleep/rest suppress, time-aware wording, and daily-memory writeback explicit and state-backed, while keeping the shared core host-neutral.
-  - It also lets users adjust follow-up behavior through ordinary language instead of rigid config edits.
+  - Use `OpenClaw Continuity` when an OpenClaw agent should remember the right thing, follow up on the right topic, and keep `/new` continuity attached to the correct thread instead of collapsing into generic small talk.
+  - The package gives agents a state-backed continuity layer across ordinary chat, staged memory, and tracked follow-up, with explicit closure, cooldown, sleep/rest suppress, dispatch caps, and daily-memory writeback.
+  - It also lets users adjust follow-up behavior through ordinary language instead of rigid config edits, while keeping the shared core host-neutral.
 - 中文：
-  - 當 OpenClaw agent 需要在一般對話、暫存記憶與正式追蹤之間建立穩定延續層時，就適合用 `OpenClaw Continuity`。
-  - 這個技能把 carryover、退場、冷卻、作息抑制、時間感措辭與 daily memory 寫回都做成明確、可檢查的狀態，而不是讓模型自己猜。
+  - 當 OpenClaw agent 需要記住對的事、追對的主題、並在 `/new` 之後接回正確脈絡，而不是掉回空泛閒聊時，就適合用 `OpenClaw Continuity`。
+  - 這個技能把一般對話、暫存記憶、正式追蹤之間的延續層做成 state-backed 結構，讓 closure、cooldown、作息抑制、dispatch cap、時間感措辭與 daily memory 寫回都可檢查、可驗證。
   - 同時也讓使用者能用一般口語調整設定，不需要卡在技術指令上。
 
 ## ClawHub recommended positioning
@@ -167,7 +167,18 @@ Do not omit these when preparing the final ClawHub listing or SKILL summary:
 
 `OpenClaw Continuity` adds a state-backed continuity layer to OpenClaw agents.
 
-It is built for agents that need:
+It is for agents that should feel coherent after an interruption, a `/new` turn, or a delayed follow-up — without turning normal chat into noisy system chatter.
+
+What users get immediately:
+
+- `/new` reconnects the right pending topic instead of collapsing into generic small talk
+- “let's talk about it later” can stay staged instead of being forgotten
+- follow-up stays explicit with closure, cooldown, dedupe, dispatch caps, and sleep/rest suppress
+- time-aware wording uses elapsed time, cross-midnight context, and sleep/wake boundaries instead of vague guessing
+- settings can be changed through ordinary language instead of config-only control
+- daily-memory writeback comes from structured continuity state, not model improvisation
+
+What the engine provides under the hood:
 
 - detailed time sense based on elapsed time, day boundary, and sleep/wake phase
 - `/new` carryover that reconnects the right pending topic
@@ -191,7 +202,18 @@ please star the GitHub repository.
 
 `OpenClaw Continuity` 是替 OpenClaw agent 補上結構化延續層的技能包。
 
-它提供：
+它適合那些在對話中斷、`/new` 重開、或延後追蹤之後，仍然需要保持前後一致的 agent，而且不能把正常聊天搞成系統訊息噪音。
+
+使用者最直接感受到的是：
+
+- `/new` 之後能接回正確待續主題，而不是掉回空泛寒暄
+- 「晚點再聊」可以被穩定暫存，而不是直接遺失
+- 關心與追蹤有 closure、cooldown、dedupe、dispatch cap 與作息抑制，不會亂追
+- 時間感會看經過多久、是否跨日、是否跨睡眠/醒來邊界，而不是模糊猜測
+- 可以用自然口語調整設定，而不是只靠改 config
+- daily memory 寫回來自結構化 continuity state，不靠模型亂編
+
+底層能力則包括：
 
 - 根據經過多久、是否跨日、是否跨睡眠/醒來邊界來表達的細時間感
 - `/new` 之後能接回正確待續主題的 carryover
