@@ -24,12 +24,15 @@ Technical package / slug:
     they are backed by explicit state.
   - Users also need a simple way to change care and follow-up behavior without
     editing config files by hand.
+  - They also need to be able to say what they want directly in chat, instead
+    of memorizing backend-only commands.
   - `OpenClaw Continuity` adds that state-backed middle layer without forcing a
     host-specific personality or transport stack.
 - 中文：
   - 很多 OpenClaw agent 會聊天，但沒有穩定的延續感。
   - `/new` 接回、暫存話題、正式追蹤、退場、冷卻、時間感措辭與作息寫回，若沒有結構化狀態支撐，通常很容易漂掉。
   - 使用者也需要能用口語調整關心與追蹤節奏，而不是每次都去改設定檔。
+  - 使用者也需要能直接在對話裡說「幫我調整一下」，而不是被迫記一堆後台指令。
   - `OpenClaw Continuity` 補上的就是這一層，不綁死人格，也不綁死單一平台。
 
 ## GitHub repository description
@@ -103,7 +106,7 @@ turning ordinary conversation into noisy system chatter.
 ## ClawHub short description
 
 - EN: Make OpenClaw remember the right thing, reconnect the right topic after `/new`, and follow up naturally without leaking internal continuity logic into chat.
-- 中文：讓 OpenClaw 記住對的事、在 `/new` 後接回正確主題，並自然追蹤而不把內部 continuity 邏輯漏到前台對話。
+- 中文：讓 OpenClaw 記住對的事、在 `/new` 後接回正確主題，能自然追蹤，也能直接用口語調整功能與節奏，而不把內部 continuity 邏輯漏到前台對話。
 
 ## ClawHub longer description
 
@@ -169,6 +172,11 @@ Do not omit these when preparing the final ClawHub listing or SKILL summary:
 
 It is for agents that should feel coherent after an interruption, a `/new` turn, or a delayed follow-up — without turning normal chat into noisy system chatter.
 
+It is not just a cron-style message sender. The point is not “send something later.”
+The point is to reconnect the right topic, decide whether follow-up is actually
+appropriate, and respect routine, quiet hours, sleep/rest suppress, closure,
+cooldown, and dispatch caps before anything reaches frontstage chat.
+
 What users get immediately:
 
 - `/new` reconnects the right pending topic instead of collapsing into generic small talk
@@ -176,7 +184,16 @@ What users get immediately:
 - follow-up stays explicit with closure, cooldown, dedupe, dispatch caps, and sleep/rest suppress
 - time-aware wording uses elapsed time, cross-midnight context, and sleep/wake boundaries instead of vague guessing
 - settings can be changed through ordinary language instead of config-only control
+- users can ask for quieter nights, slower follow-up, or different care behavior directly in chat
 - daily-memory writeback comes from structured continuity state, not model improvisation
+
+Different follow-up paths stay different on purpose:
+
+- ordinary chat stays ordinary chat
+- something to revisit later can stay staged
+- something that truly matters can become tracked follow-up
+- routine-aware care can be suppressed or delayed when the user is resting
+- quiet-hours and do-not-disturb style behavior are part of the feature set, not an afterthought
 
 What the engine provides under the hood:
 
@@ -204,6 +221,10 @@ please star the GitHub repository.
 
 它適合那些在對話中斷、`/new` 重開、或延後追蹤之後，仍然需要保持前後一致的 agent，而且不能把正常聊天搞成系統訊息噪音。
 
+它不是單純排一個 cron 然後晚點推一句訊息出去。重點不是「之後發一則」，而是：
+要不要追、該追哪個主題、現在是不是打擾、是否該進入勿擾/休息抑制、是否已經該退場或冷卻，
+都要先根據上下文與因果狀態判斷，再決定前台要不要出現內容。
+
 使用者最直接感受到的是：
 
 - `/new` 之後能接回正確待續主題，而不是掉回空泛寒暄
@@ -211,7 +232,16 @@ please star the GitHub repository.
 - 關心與追蹤有 closure、cooldown、dedupe、dispatch cap 與作息抑制，不會亂追
 - 時間感會看經過多久、是否跨日、是否跨睡眠/醒來邊界，而不是模糊猜測
 - 可以用自然口語調整設定，而不是只靠改 config
+- 可以直接在對話裡說「幫我調整功能」或「半夜少提醒一點」，不用先背技術指令
 - daily memory 寫回來自結構化 continuity state，不靠模型亂編
+
+不同路徑會明確分開，而不是混成一種「晚點提醒」：
+
+- 一般聊天就是一般聊天
+- 晚點再聊的事可以先暫存
+- 真正重要的事才進正式追蹤
+- 作息、勿擾、睡眠/休息抑制本身就是功能，不是附帶條件
+- 關心不是亂發，而是根據上下文與因果記憶決定是否該出現
 
 底層能力則包括：
 

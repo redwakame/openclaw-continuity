@@ -15,6 +15,7 @@ It adds a **state-backed continuity engine** to OpenClaw agents so they can:
 - distinguish ordinary chat, staged memory, and tracked follow-up
 - understand time using elapsed time, cross-midnight context, and routine phase
 - let users adjust care and follow-up behavior with natural language instead of rigid config editing
+- let users directly ask to change behavior, pacing, or settings without hunting for backend commands
 
 ## One-line summary
 
@@ -44,6 +45,8 @@ and follow up naturally.
   - 有 closure、cooldown、dedupe、dispatch cap、作息抑制
 - **設定可以直接用口語調**
   - 不用每次都去翻設定檔
+- **功能和節奏可以直接開口改**
+  - 像是「幫我調整關心設定」、「把主動關心改保守一點」、「半夜不要一直追」、「追蹤晚一點再提醒我」
 
 它補的是現在很多 agent 最常缺的四件事：
 
@@ -69,6 +72,7 @@ What users notice first:
 - “let's talk about it later” can stay staged instead of being forgotten
 - follow-up stays explicit with closure, cooldown, dedupe, dispatch caps, and sleep/rest suppress
 - settings can be changed through ordinary language instead of config-only control
+- behavior can be adjusted directly in chat instead of forcing users into backend-only commands
 
 What the package provides under the hood:
 
@@ -86,6 +90,8 @@ What the package provides under the hood:
   - keep `/new` carryover attached to the right pending topic instead of collapsing into generic small talk
 - **Natural-language control / 口語就能改設定**
   - adjust schedule, proactive care, tracking rhythm, and style through ordinary requests
+- **Direct in-chat changes / 功能與指令不用卡在後台**
+  - ask for more or less follow-up, quieter nights, slower retries, or different care style directly in chat
 - **Frontstage-safe care and follow-up / 關心與追蹤不把對話帶歪**
   - cooldown, closure, sleep/rest suppress, and dispatch caps stay explicit
 - **Structured writeback / 記憶寫回有依據**
@@ -123,8 +129,11 @@ please star the repository on GitHub.
   - examples:
     - `幫我調整關心設定`
     - `把主動關心改成保守一點`
+    - `半夜不要一直提醒我`
+    - `追蹤改成晚一點再問`
     - `Help me adjust my follow-up settings`
     - `Check in less often after midnight`
+    - `Be quieter tonight`
 - **Memory that stays auditable**
   - staged and tracked items leave concise, structured traces instead of vague “the model probably remembered it”
 
