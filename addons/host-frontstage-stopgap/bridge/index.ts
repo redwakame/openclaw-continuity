@@ -463,6 +463,22 @@ function isCronSession(ctx: any): boolean {
   return sessionKey.includes(":cron:");
 }
 
+function isInternalSessionScope(ctx: any, sessionKey: string): boolean {
+  const value = typeof sessionKey === "string" ? sessionKey.trim() : "";
+  if (!value) return true;
+  if (isHeartbeatSession(ctx) || isCronSession(ctx)) return true;
+  if (/^agent:main:main(?::heartbeat)?$/u.test(value)) return true;
+  if (/:run:/u.test(value)) return true;
+  if (/:heartbeat$/u.test(value)) return true;
+  return false;
+}
+
+function canUseFrontstageSessionCache(ctx: any, sessionKey: string): boolean {
+  const value = typeof sessionKey === "string" ? sessionKey.trim() : "";
+  if (!value) return false;
+  return !isInternalSessionScope(ctx, value);
+}
+
 function frontstageGuardSourceForText(ctx: any, text: string, fallback = "runtime-reply"): string {
   if (isHeartbeatSession(ctx)) return "heartbeat-send";
   return fallback;
@@ -907,6 +923,11 @@ const GATEWAY_LOG_TAIL_LINES = 200;
 function isTelegramDirectSessionKey(sessionKey: string): boolean {
   const value = typeof sessionKey === "string" ? sessionKey.trim() : "";
   return value.includes(":telegram:direct:");
+}
+
+function isUserFacingTelegramDirectSession(ctx: any, sessionKey: string): boolean {
+  const value = typeof sessionKey === "string" ? sessionKey.trim() : "";
+  return isTelegramDirectSessionKey(value) && canUseFrontstageSessionCache(ctx, value);
 }
 
 function looksLikeRuntimeGenericErrorText(text: string): boolean {
@@ -1666,7 +1687,8 @@ export default {
         const hasVisibleText = hasVisibleAssistantText(content);
         const assistantToolUsePhase = isAssistantToolUsePhase(message);
         const assistantErrorPhase = isAssistantErrorPhase(message);
-        const isDirectTelegramSession = sessionKey.includes(":telegram:direct:");
+        const canCacheFrontstage = canUseFrontstageSessionCache(ctx, sessionKey);
+        const isDirectTelegramSession = isUserFacingTelegramDirectSession(ctx, sessionKey);
         const allowNewSessionFallback = isExplicitNewSessionTurn(event, ctx);
         const newSessionFallback = allowNewSessionFallback
           ? runNewSessionFallback(script, skillEnv, sessionKey, sessionId)
@@ -1696,7 +1718,9 @@ export default {
           api.logger.info(
             `${PLUGIN_NAME}: before_message_write NEW-SESSION-OVERRIDE (session=${sessionKey || "unknown"}, anchor=${newSessionFallback.anchorSource}/${newSessionFallback.anchorLevel})`,
           );
-          rememberFrontstageReply(_frontstageReply, sessionKey, conversationId, newSessionFallback.text);
+          if (canCacheFrontstage) {
+            rememberFrontstageReply(_frontstageReply, sessionKey, conversationId, newSessionFallback.text);
+          }
           return {
             message: {
               ...(message || {}),
@@ -1720,7 +1744,9 @@ export default {
               fallbackLength: newSessionFallback.text.length,
             });
             api.logger.info(`${PLUGIN_NAME}: before_message_write NEW-SESSION-FALLBACK (session=${sessionKey || "unknown"})`);
-            rememberFrontstageReply(_frontstageReply, sessionKey, conversationId, newSessionFallback.text);
+            if (canCacheFrontstage) {
+              rememberFrontstageReply(_frontstageReply, sessionKey, conversationId, newSessionFallback.text);
+            }
             return {
               message: {
                 ...(message || {}),
@@ -1752,7 +1778,9 @@ export default {
           api.logger.info(
             `${PLUGIN_NAME}: before_message_write RUNTIME-EMPTY-RECOVER (session=${sessionKey || "unknown"}, len=${recoveryText.length})`,
           );
-          rememberFrontstageReply(_frontstageReply, sessionKey, conversationId, recoveryText);
+          if (canCacheFrontstage) {
+            rememberFrontstageReply(_frontstageReply, sessionKey, conversationId, recoveryText);
+          }
           return {
             message: {
               ...(message || {}),
@@ -1817,7 +1845,7 @@ export default {
             source: "runtime-reply",
             originalLength: originalVisibleText.length,
           });
-          if (isTelegramDirectSessionKey(sessionKey)) {
+          if (isDirectTelegramSession) {
             rememberPreservedRuntimeReply(
               _preservedRuntimeReply,
               sessionKey,
@@ -1829,7 +1857,9 @@ export default {
           api.logger.info(
             `${PLUGIN_NAME}: before_message_write PRESERVE-ORIGINAL-AFTER-EMPTY-SANITIZE (session=${sessionKey || "unknown"})`,
           );
-          rememberFrontstageReply(_frontstageReply, sessionKey, conversationId, originalVisibleText);
+          if (canCacheFrontstage) {
+            rememberFrontstageReply(_frontstageReply, sessionKey, conversationId, originalVisibleText);
+          }
           return { message };
         }
         if (allowNewSessionFallback && !assistantErrorPhase && !assistantToolUsePhase && message?.role === "assistant" && Array.isArray(sanitized?.content) && !hasVisibleAssistantText(sanitized.content)) {
@@ -1847,7 +1877,9 @@ export default {
               fallbackLength: newSessionFallback.text.length,
             });
             api.logger.info(`${PLUGIN_NAME}: before_message_write NEW-SESSION-FALLBACK-AFTER-GUARD (session=${sessionKey || "unknown"})`);
-            rememberFrontstageReply(_frontstageReply, sessionKey, conversationId, newSessionFallback.text);
+            if (canCacheFrontstage) {
+              rememberFrontstageReply(_frontstageReply, sessionKey, conversationId, newSessionFallback.text);
+            }
             return {
               message: {
                 ...(message || {}),
@@ -1859,12 +1891,16 @@ export default {
         }
         if (!sanitized) {
           if (message?.role === "assistant" && Array.isArray(content) && hasVisibleText) {
-            rememberFrontstageReply(_frontstageReply, sessionKey, conversationId, assistantVisibleText(content));
+            if (canCacheFrontstage) {
+              rememberFrontstageReply(_frontstageReply, sessionKey, conversationId, assistantVisibleText(content));
+            }
           }
           return;
         }
         if (Array.isArray(sanitized?.content) && hasVisibleAssistantText(sanitized.content)) {
-          rememberFrontstageReply(_frontstageReply, sessionKey, conversationId, assistantVisibleText(sanitized.content));
+          if (canCacheFrontstage) {
+            rememberFrontstageReply(_frontstageReply, sessionKey, conversationId, assistantVisibleText(sanitized.content));
+          }
         }
         return { message: sanitized };
       },
@@ -1880,7 +1916,8 @@ export default {
         const conversationId = typeof ctx?.conversationId === "string"
           ? ctx.conversationId
           : (event?.to != null ? String(event.to) : "");
-        const isDirectTelegramSession = isTelegramDirectSessionKey(sessionKey);
+        const canCacheFrontstage = canUseFrontstageSessionCache(ctx, sessionKey);
+        const isDirectTelegramSession = isUserFacingTelegramDirectSession(ctx, sessionKey);
         if (typeof content !== "string" || !content.trim()) {
           const stashed = takeBmwFallback(_bmwFallbackStash, sessionKey, conversationId);
           if (stashed) {
@@ -1996,8 +2033,10 @@ export default {
           return;
         }
 
-        const frontstageReply = takeFrontstageReply(_frontstageReply, sessionKey, conversationId);
-        if (frontstageReply && !isHeartbeatSession(ctx)) {
+        const frontstageReply = canCacheFrontstage
+          ? takeFrontstageReply(_frontstageReply, sessionKey, conversationId)
+          : null;
+        if (frontstageReply && canCacheFrontstage) {
           if (frontstageReply.text !== content) {
             appendFrontstageBridgeAudit(dataDir, {
               phase: "message_sending",
@@ -2100,7 +2139,7 @@ export default {
           const recentUserText = readRecentUserText(_recentUserTextBySession, sessionKey);
           const preservedRuntimeReply =
             source === "runtime-reply" &&
-            isTelegramDirectSessionKey(sessionKey) &&
+            isDirectTelegramSession &&
             Boolean(recentUserText) &&
             takePreservedRuntimeReply(_preservedRuntimeReply, sessionKey, conversationId);
           if (preservedRuntimeReply) {
