@@ -2065,6 +2065,10 @@ export default {
         }
         const channel = event?.metadata?.channel || ctx?.channelId || "unknown";
         const precleanedContent = stripHostFrontstageLeakage(content);
+        const sessionlessFrontstageReply =
+          channel === "telegram" && !sessionKey
+            ? takeFrontstageReply(_frontstageReply, sessionKey, conversationId)
+            : null;
         const approvedSessionlessTelegram =
           channel === "telegram" && !sessionKey
             ? takeApprovedTelegramSend(_approvedTelegramSend, conversationId, precleanedContent || content)
@@ -2073,6 +2077,24 @@ export default {
           channel === "telegram" && !sessionKey
             ? peekRecentInternalLocalTranscript(_recentInternalLocalTranscript, conversationId)
             : null;
+
+        if (channel === "telegram" && !sessionKey && sessionlessFrontstageReply) {
+          if (sessionlessFrontstageReply.text !== content) {
+            appendFrontstageBridgeAudit(dataDir, {
+              phase: "message_sending",
+              event: "sync-frontstage-reply",
+              sessionKey,
+              channel,
+              originalLength: content.length,
+              syncedLength: sessionlessFrontstageReply.text.length,
+            });
+            api.logger.info(
+              `${PLUGIN_NAME}: message_sending SYNC-FRONTSTAGE-REPLY (channel=${channel}, ${content.length}→${sessionlessFrontstageReply.text.length}, source=sessionless-direct)`,
+            );
+            return { content: sessionlessFrontstageReply.text };
+          }
+          return;
+        }
 
         if (channel === "telegram" && !sessionKey && recentInternalTranscript && !approvedSessionlessTelegram) {
           appendFrontstageBridgeAudit(dataDir, {
