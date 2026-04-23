@@ -1,1 +1,6 @@
-7aae9bdc42756712a7b84f79f92463964ad1a3fd8890c31fde3d791675d0d1e7  V2公版-20260418.zip
+# SHA256SUMS
+
+Release ZIP checksums are generated per published release asset and listed in
+the corresponding GitHub Release notes.
+
+This repository file intentionally does not name local desktop archives.
