@@ -2128,13 +2128,12 @@ def normalize_incident_record(incident: dict) -> dict:
         incident.get("source_summary", ""),
         incident_type=incident.get("type"),
     )
-    event_chain = sanitize_event_chain_payload(
-        merge_event_chain(
-            incident.get("event_chain") or payload.get("event_chain"),
-            incident.get("source_summary", ""),
-            event_kind,
-            topic_label=topic_label,
-        )
+    event_chain = normalize_record_event_chain(
+        incident.get("event_chain"),
+        payload.get("event_chain"),
+        incident.get("source_summary", ""),
+        event_kind,
+        topic_label=topic_label,
     )
     summary = (
         normalized_existing
@@ -2183,13 +2182,12 @@ def normalize_hook_record(hook: dict) -> dict:
         hook.get("source_summary", ""),
         incident_type=payload.get("incident_type"),
     )
-    event_chain = sanitize_event_chain_payload(
-        merge_event_chain(
-            hook.get("event_chain") or payload.get("event_chain"),
-            hook.get("source_summary", ""),
-            event_kind,
-            topic_label=topic_label,
-        )
+    event_chain = normalize_record_event_chain(
+        hook.get("event_chain"),
+        payload.get("event_chain"),
+        hook.get("source_summary", ""),
+        event_kind,
+        topic_label=topic_label,
     )
     summary = (
         normalized_existing
@@ -5617,6 +5615,34 @@ def sanitize_event_chain_payload(event_chain: dict) -> dict:
 
     cleaned = _sanitize(event_chain)
     return cleaned if isinstance(cleaned, dict) else {}
+
+
+def prefer_richer_event_chain(primary: Optional[dict], secondary: Optional[dict]) -> dict:
+    primary_clean = sanitize_event_chain_payload(primary if isinstance(primary, dict) else {})
+    secondary_clean = sanitize_event_chain_payload(secondary if isinstance(secondary, dict) else {})
+    if count_event_chain_fields(secondary_clean) > count_event_chain_fields(primary_clean):
+        return secondary_clean
+    return primary_clean or secondary_clean
+
+
+def normalize_record_event_chain(
+    primary: Optional[dict],
+    secondary: Optional[dict],
+    source_summary: str,
+    event_kind: str,
+    topic_label: str = "",
+) -> dict:
+    preferred = prefer_richer_event_chain(primary, secondary)
+    if count_event_chain_fields(preferred) >= 4:
+        return preferred
+    return sanitize_event_chain_payload(
+        merge_event_chain(
+            preferred,
+            source_summary,
+            event_kind,
+            topic_label=topic_label,
+        )
+    )
 
 
 def sanitize_carryover_store(carryover: dict) -> dict:
@@ -12453,10 +12479,12 @@ def sync_linked_incident_from_staging(record: dict, now_dt: datetime) -> bool:
             continue
         hook["source_summary"] = f"[incident:{incident['id']}] {incident.get('source_summary')}"
         hook["normalized_seed_summary"] = incident.get("normalized_seed_summary")
+        hook["event_kind"] = incident.get("event_kind") or hook.get("event_kind")
         hook["event_chain_id"] = hook.get("event_chain_id") or incident.get("event_chain_id")
+        hook["event_chain"] = prefer_richer_event_chain(hook.get("event_chain"), incident.get("event_chain"))
         hook_payload = hook.get("payload") if isinstance(hook.get("payload"), dict) else {}
-        hook_payload["event_kind"] = incident.get("event_kind")
-        hook_payload["event_chain"] = incident.get("event_chain")
+        hook_payload["event_kind"] = hook.get("event_kind")
+        hook_payload["event_chain"] = deepcopy(hook.get("event_chain")) if isinstance(hook.get("event_chain"), dict) else incident.get("event_chain")
         hook_payload["event_chain_id"] = incident.get("event_chain_id")
         for key in CONTINUITY_BUNDLE_FIELD_KEYS:
             value = incident.get(key) if incident.get(key) not in (None, "", [], {}) else payload.get(key)

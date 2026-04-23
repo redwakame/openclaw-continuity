@@ -521,6 +521,7 @@ class Harness:
         result["actual_class"] = (target or {}).get("event_kind")
         result["actual_memory_layer"] = "tracked_followup" if result["incident_delta"] >= 0 else "staged_memory"
         result["actual_event_chain_fields"] = event_chain_fields(target or {})
+        result["actual_hook_event_chain_fields"] = event_chain_fields(followup.get("hook") or {})
         result["actual_followup_dispatch"] = followup
         result["actual_followup_reply_continuity"] = {
             "selected_summary": (continuity_record or {}).get("normalized_seed_summary"),
@@ -543,6 +544,7 @@ class Harness:
             and continuity_ok
             and result["this_reply_used_schedule_context"]
             and bool(result["actual_daily_memory_trace"])
+            and all(field in result["actual_hook_event_chain_fields"] for field in ("context_before", "event_core", "immediate_result", "followup_focus"))
         )
         result["pass/fail"] = "pass" if is_pass else "fail"
         result["failure_reason"] = "" if is_pass else "watchful state failed tracking, natural follow-up, or continuity"
@@ -573,6 +575,7 @@ class Harness:
         result["actual_class"] = (target or {}).get("event_kind")
         result["actual_memory_layer"] = "tracked_followup" if after["incident_count"] > before["incident_count"] else "staged_memory"
         result["actual_event_chain_fields"] = event_chain_fields(target or {})
+        result["actual_hook_event_chain_fields"] = event_chain_fields(followup.get("hook") or {})
         result["actual_followup_dispatch"] = followup
         result["actual_followup_reply_continuity"] = {
             "selected_summary": (continuity_record or {}).get("normalized_seed_summary"),
@@ -593,6 +596,7 @@ class Harness:
             and bool(followup.get("message"))
             and result["actual_followup_reply_continuity"]["continuity_match"]
             and bool(result["actual_daily_memory_trace"])
+            and all(field in result["actual_hook_event_chain_fields"] for field in ("context_before", "event_core", "immediate_result", "followup_focus"))
         )
         result["pass/fail"] = "pass" if is_pass else "fail"
         result["failure_reason"] = "" if is_pass else "delegated task failed tracked flow or follow-up continuity"
@@ -624,6 +628,7 @@ class Harness:
         result["actual_class"] = (target or {}).get("event_kind")
         result["actual_memory_layer"] = "tracked_followup" if after["incident_count"] > before["incident_count"] else "staged_memory"
         result["actual_event_chain_fields"] = event_chain_fields(target or {})
+        result["actual_hook_event_chain_fields"] = event_chain_fields(followup.get("hook") or {})
         result["actual_followup_dispatch"] = followup
         result["actual_followup_reply_continuity"] = {
             "selected_summary": (continuity_record or {}).get("normalized_seed_summary"),
@@ -646,6 +651,7 @@ class Harness:
             and chainful
             and result["actual_followup_reply_continuity"]["continuity_match"]
             and bool(result["actual_daily_memory_trace"])
+            and all(field in result["actual_hook_event_chain_fields"] for field in ("context_before", "event_core", "immediate_result", "followup_focus"))
         )
         result["pass/fail"] = "pass" if is_pass else "fail"
         result["failure_reason"] = "" if is_pass else "sensitive event did not keep event chain or continuity"
