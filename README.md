@@ -578,3 +578,7 @@ See [docs/harness.md](docs/harness.md) for sandbox override details and
 ## Future install path
 
 This repository may later grow toward a ClawHub/install-flow friendly package shape, but the current release is intentionally optimized for manual local installation in an existing OpenClaw environment.
+
+## Download History
+
+[![Download History](https://skill-history.com/chart/redwakame/openclaw-continuity.svg)](https://skill-history.com/redwakame/openclaw-continuity)
