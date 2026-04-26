@@ -54,7 +54,7 @@ Technical package / slug:
 
 ## GitHub release title
 
-- `OpenClaw Continuity 2.0.13`
+- `OpenClaw Continuity 2.0.14`
 
 ## GitHub release notes
 
@@ -74,13 +74,17 @@ closure, cooldown, time-aware wording, and frontstage-safe proactive behavior.
 - keeps time sense grounded in elapsed time, day boundary, and routine phase
 - lets users change follow-up behavior through natural requests instead of config-only control
 - writes concise daily-memory traces from structured continuity state
-- ships an optional bridge/addon layer without making the shared core host-specific
+- keeps optional bridge/addon references in GitHub source without making the
+  shared core or ClawHub install bundle host-specific
 - fixes routine-aware sleep handoff for night-owl schedules: when a user goes to
   sleep near `sleep_time` and `wake_time` is still later on the same local day,
   the runtime nudges the model toward a same-day “after you wake” handoff rather
   than a generic next-day goodbye
 - aligns ClawHub registry metadata with `SKILL.md` runtime requirements
   (`macOS/Linux`, `python3`, `OPENCLAW_STATE_DIR`, and `OPENCLAW_CONFIG_PATH`)
+- publishes a portable-core ClawHub bundle: host-only operator templates and
+  near-live QA runners remain available in GitHub source, but are excluded from
+  normal ClawHub installs
 
 #### Why it matters
 
@@ -109,6 +113,8 @@ turning ordinary conversation into noisy system chatter.
   不再讓模型套用泛用的隔天道別
 - 對齊 ClawHub registry metadata 與 `SKILL.md` 的 runtime requirements：
   `macOS/Linux`、`python3`、`OPENCLAW_STATE_DIR`、`OPENCLAW_CONFIG_PATH`
+- ClawHub 安裝包改為 portable core：host-only operator templates 與 near-live
+  QA runner 保留在 GitHub 原始碼，但不放進一般 ClawHub 安裝包
 
 #### 為什麼重要
 
@@ -173,7 +179,7 @@ Do not omit these when preparing the final ClawHub listing or SKILL summary:
 - guided settings
 - natural-language settings entry
 - host-neutral shared core
-- optional bridge/addon layer
+- optional bridge/addon references in GitHub source, while ClawHub installs stay portable-core
 
 ## ClawHub long description draft
 

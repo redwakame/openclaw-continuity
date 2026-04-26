@@ -1,0 +1,7 @@
+# ClawHub should publish the portable OpenClaw skill core.
+# Host-only operator templates and near-live QA runners stay in the GitHub source
+# for maintainers, but are not needed for normal ClawHub installs.
+
+scripts/web_live_runner.mjs
+addons/host-frontstage-stopgap/
+addons/host-voice-send-template/

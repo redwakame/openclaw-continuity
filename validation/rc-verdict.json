@@ -21,7 +21,7 @@
     ]
   },
   "validation_summary": {
-    "followup_harness_20260427_063256": {
+    "followup_harness_20260427_064440": {
       "pass_count": 14,
       "fail_count": 0,
       "evidence": "python3 scripts/followup_skill_harness.py --absence-minutes 3",
@@ -32,6 +32,12 @@
       "fail_count": 0,
       "evidence": "_meta.json now declares the same OS, python3 binary, and OpenClaw env requirements as SKILL.md metadata.",
       "notes": "Scanner-facing metadata alignment only; no runtime behavior changed."
+    },
+    "clawhub_core_bundle_20260427": {
+      "pass_count": 1,
+      "fail_count": 0,
+      "evidence": ".clawhubignore excludes host-only operator templates and near-live QA runners from ClawHub installs.",
+      "notes": "Portable skill core remains unchanged; GitHub source retains maintainer-only examples."
     },
     "arbiter": {
       "pass_count": 6,

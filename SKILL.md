@@ -70,7 +70,6 @@ Use this skill when the user is naturally:
 
 - Script: `scripts/personal_hooks.py`
 - Harness: `scripts/followup_skill_harness.py`
-- Optional web runner: `scripts/web_live_runner.mjs`
 - Config schema: `config.schema.json`
 - Sample config: `examples/settings.sample.json`
 - Docs:
@@ -113,6 +112,9 @@ plumbing. Keep these boundaries explicit:
   - host/runtime heartbeat configuration for safe background follow-up
 
 These are optional host integrations, not part of the portable skill core.
+ClawHub installs publish the portable core only; GitHub source keeps operator
+templates and local QA runners for maintainers who explicitly need host-side
+integration examples.
 
 ## Entry points
 
