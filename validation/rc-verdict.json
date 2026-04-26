@@ -21,6 +21,12 @@
     ]
   },
   "validation_summary": {
+    "followup_harness_20260427_061117": {
+      "pass_count": 14,
+      "fail_count": 0,
+      "evidence": "python3 scripts/followup_skill_harness.py --absence-minutes 3",
+      "notes": "Includes same-day wake handoff guard in the time_sense case."
+    },
     "arbiter": {
       "pass_count": 6,
       "fail_count": 0

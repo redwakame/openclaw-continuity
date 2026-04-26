@@ -28,6 +28,8 @@ and follow up naturally.
 
 ![OpenClaw Continuity architecture](assets/publish/continuity-architecture.svg)
 
+![OpenClaw Continuity install placement](assets/publish/install-placement-en.svg)
+
 ## 中文簡介
 
 `OpenClaw Continuity` 是一個替 OpenClaw 補上「延續感、關心、追蹤」
@@ -200,6 +202,11 @@ These are now part of the A-bucket public package, not just lab-only patches:
   - `time_modifier_prompt`
   - post-`/new` low-information continuity guard
   so web hosts receive the same continuity/tone constraints as the skill path
+- routine-aware sleep handoff now handles late-hour night-owl schedules more
+  precisely: when the user says they are going to sleep near the configured
+  `sleep_time` and the next configured `wake_time` is later on the same local
+  day, the runtime nudges the model toward “下午見 / 起床後再接” instead of a
+  generic next-day goodbye
 
 For optional voice/TTS host integration, see
 [docs/host-voice-integration.md](docs/host-voice-integration.md).
@@ -289,7 +296,7 @@ If you want a one-line package fetch through npm without waiting for a public np
 registry publish, install directly from the GitHub repository:
 
 ```bash
-npm install github:redwakame/openclaw-continuity#v2.0.11
+npm install github:redwakame/openclaw-continuity#v2.0.12
 ```
 
 This fetches the release source through npm's GitHub transport path.

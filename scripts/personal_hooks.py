@@ -19093,6 +19093,16 @@ def build_time_modifier_prompt(
     elif next_transition_kind == "sleep" and minutes_to_transition is not None and minutes_to_transition <= 90:
         lines.append("The user is nearing their usual rest boundary. If they sound tired or the thread is naturally winding down, you may gently lean toward 收尾 / 休息.")
         lines.append("If the time itself changes the advice, you may mention it naturally after reconnecting to the thread.")
+        wake_clock = routine_schedule_wake_time()
+        rest_text = str(user_text or "")
+        if wake_clock and any(token in rest_text.lower() for token in ["睡", "休息", "累", "晚安", "sleep", "rest", "bed", "good night"]):
+            wake_dt = next_clock_dt(now_dt, wake_clock)
+            local_wake = routine_schedule_local_dt(wake_dt)
+            if local_wake.date() == local_now.date():
+                wake_label = local_wake.strftime("%H:%M")
+                lines.append(
+                    f"The user's next natural resume point is later the same local calendar day around {wake_label}, after they wake. Use same-day handoff wording such as 下午見 / 起床後再接 / later after you wake instead of next-day goodbye wording."
+                )
     elif next_transition_kind == "active_day" and minutes_to_transition is not None and minutes_to_transition <= 60:
         lines.append("The user is just leaving the wake-window and settling into the day. Keep continuity natural and avoid over-urgent follow-up framing.")
     if user_text and any(token in user_text for token in ["睡", "休息", "累", "下班", "收工"]):

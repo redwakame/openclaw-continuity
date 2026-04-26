@@ -824,9 +824,41 @@ class Harness:
     def run_time_sense_case(self) -> dict:
         self.reset_case()
         case_id = "time_sense"
+        settings = self.ph.load_settings()
+        routine = settings.setdefault("routine_schedule", {})
+        routine.update(
+            {
+                "enabled": True,
+                "timezone": "Asia/Taipei",
+                "sleep_time": "06:00",
+                "wake_time": "14:30",
+                "wake_window_minutes": 60,
+            }
+        )
+        self.ph.save_settings(settings)
+        profile = self.ph.load_profile()
+        profile["sleep_pattern"] = {
+            "chronotype": "night_owl",
+            "usual_sleep_time": "06:00",
+            "usual_wake_time": "14:30",
+            "active_window": "14:30-06:00",
+            "care_nudge_time": "04:00",
+            "sleep_block_window": "06:00-14:30",
+            "source": "harness",
+        }
+        self.ph.save_profile(profile)
         now_dt = datetime(2026, 3, 19, 1, 35, tzinfo=TAIPEI)
         before = self.snapshot(now_dt)
         turn = self.run_user_turn(case_id, "time-session", "我現在真的很累，但不想被勸睡，妳先陪我放著。", now_dt, 1)
+        same_day_sleep_dt = datetime(2026, 3, 19, 5, 9, tzinfo=TAIPEI)
+        same_day_sleep = self.ph.build_runtime_context(
+            session_id="time-session",
+            session_key=DIRECT_SESSION_KEY,
+            user_text="沒有，我準備睡覺了",
+            now_dt=same_day_sleep_dt,
+            is_new_session=False,
+            user_turn_index=2,
+        )
         hook_store = self.ph.load_hooks()
         pending_ids = [hook.get("id") for hook in hook_store.get("hooks", []) if hook.get("status") == "pending"]
         self.shorten_pending_hook_triggers(now_dt, pending_ids)
@@ -847,9 +879,16 @@ class Harness:
         result["this_reply_used_schedule_context"] = bool(turn["runtime_context"].get("schedule_context_prompt"))
         result["this_reply_used_no_memory_guard"] = bool(turn["runtime_context"].get("pending_memory_guard_prompt"))
         result["this_reply_used_false_closure_guard"] = bool(turn["runtime_context"].get("false_closure_guard_prompt"))
-        is_pass = result["this_reply_used_schedule_context"] and not any(token in message for token in ("快去睡", "太晚了還不睡", "早點睡"))
+        same_day_prompt = str(same_day_sleep.get("time_modifier_prompt") or "")
+        result["same_day_wake_guard_present"] = "same local calendar day" in same_day_prompt and "14:30" in same_day_prompt
+        result["same_day_wake_guard_prompt"] = same_day_prompt
+        is_pass = (
+            result["this_reply_used_schedule_context"]
+            and result["same_day_wake_guard_present"]
+            and not any(token in message for token in ("快去睡", "太晚了還不睡", "早點睡"))
+        )
         result["pass/fail"] = "pass" if is_pass else "fail"
-        result["failure_reason"] = "" if is_pass else "schedule context was not present or late-night reply slipped into sleep-policing"
+        result["failure_reason"] = "" if is_pass else "schedule context was missing, same-day wake guard was missing, or late-night reply slipped into sleep-policing"
         return result
 
     def run_duplicate_followup_suppression_case(self) -> dict:

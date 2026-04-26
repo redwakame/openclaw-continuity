@@ -54,7 +54,7 @@ Technical package / slug:
 
 ## GitHub release title
 
-- `OpenClaw Continuity 2.0.11`
+- `OpenClaw Continuity 2.0.12`
 
 ## GitHub release notes
 
@@ -75,6 +75,10 @@ closure, cooldown, time-aware wording, and frontstage-safe proactive behavior.
 - lets users change follow-up behavior through natural requests instead of config-only control
 - writes concise daily-memory traces from structured continuity state
 - ships an optional bridge/addon layer without making the shared core host-specific
+- fixes routine-aware sleep handoff for night-owl schedules: when a user goes to
+  sleep near `sleep_time` and `wake_time` is still later on the same local day,
+  the runtime nudges the model toward a same-day “after you wake” handoff rather
+  than a generic next-day goodbye
 
 #### Why it matters
 
@@ -98,6 +102,9 @@ turning ordinary conversation into noisy system chatter.
 - 讓使用者可以用口語調整作息、關心與追蹤節奏，而不是只靠設定檔
 - 讓 daily memory 寫回來自結構化 continuity state，而不是模型亂猜
 - 提供可選 bridge/addon，但 shared core 不綁死單一 host
+- 修復晚睡型作息的睡前交接：當使用者接近 `sleep_time` 說要睡，而
+  `wake_time` 仍在同一本地日期稍晚時，runtime 會引導成「下午見／起床後再接」，
+  不再讓模型套用泛用的隔天道別
 
 #### 為什麼重要
 
@@ -186,6 +193,25 @@ What users get immediately:
 - settings can be changed through ordinary language instead of config-only control
 - users can ask for quieter nights, slower follow-up, or different care behavior directly in chat
 - daily-memory writeback comes from structured continuity state, not model improvisation
+- routine-aware sleep handoff respects night-owl sleep/wake boundaries, including same-day afternoon wake-up after early-morning sleep
+
+Install placement:
+
+```text
+openclaw-workspace/
+  skills/
+    personal-hooks/
+      SKILL.md
+      scripts/
+      docs/
+      examples/
+```
+
+After copying or linking the folder, initialize with:
+
+```bash
+python3 openclaw-workspace/skills/personal-hooks/scripts/personal_hooks.py init
+```
 
 Different follow-up paths stay different on purpose:
 
@@ -234,6 +260,8 @@ please star the GitHub repository.
 - 可以用自然口語調整設定，而不是只靠改 config
 - 可以直接在對話裡說「幫我調整功能」或「半夜少提醒一點」，不用先背技術指令
 - daily memory 寫回來自結構化 continuity state，不靠模型亂編
+- 晚睡型作息的睡前交接會尊重睡眠/醒來邊界，例如凌晨睡、同日下午起床時，
+  會引導成下午或起床後再接，而不是泛用地說明天見
 
 不同路徑會明確分開，而不是混成一種「晚點提醒」：
 
@@ -261,6 +289,24 @@ please star the GitHub repository.
 - host-neutral 的 shared core，搭配可選 bridge/addon
 
 這個技能適合那些需要「記得、關心、追蹤」，但又不能把正常聊天搞亂的 agent。
+
+放置位置：
+
+```text
+openclaw-workspace/
+  skills/
+    personal-hooks/
+      SKILL.md
+      scripts/
+      docs/
+      examples/
+```
+
+放好後可先初始化：
+
+```bash
+python3 openclaw-workspace/skills/personal-hooks/scripts/personal_hooks.py init
+```
 
 聯絡與回饋：`adarobot666@gmail.com`
 

@@ -24,3 +24,4 @@ recurring_tasks.json
 post_action_rules.json
 behavioral_constraints.json
 .DS_Store
+harness-reports/

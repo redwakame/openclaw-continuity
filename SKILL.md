@@ -42,6 +42,10 @@ Questions, feedback, or implementation discussion: `adarobot666@gmail.com`.
 - Apply first-run setup facts deterministically from explicit user text.
 - Apply supported guided-settings changes deterministically before the model turn
   when the request is clear enough.
+- Keep routine-aware sleep handoff precise: when a night-owl user says they are
+  going to sleep near `sleep_time`, and `wake_time` is still later on the same
+  local day, frame the next natural reconnect as later after waking rather than
+  a generic next-day farewell.
 
 ## Not in public scope
 
@@ -174,6 +178,14 @@ For capability questions, hosts should also expose:
 
 - `/care capability` / `/care 功能` / `/care 能力`
 - `/care memory` / `/care 記憶` / `/care 记忆`
+
+Users can also change schedule and do-not-disturb behavior through natural
+language, for example:
+
+- `我通常早上六點睡，下午兩點半起床`
+- `半夜不要主動關心我`
+- `把勿擾改成早上六點到下午兩點半`
+- `Help me make follow-up quieter after midnight`
 
 These are not separate memory engines. They are explanation entry points for:
 
