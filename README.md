@@ -207,6 +207,10 @@ These are now part of the A-bucket public package, not just lab-only patches:
   `sleep_time` and the next configured `wake_time` is later on the same local
   day, the runtime nudges the model toward “下午見 / 起床後再接” instead of a
   generic next-day goodbye
+- ClawHub registry metadata now declares the same OS, `python3`, and
+  `OPENCLAW_STATE_DIR` / `OPENCLAW_CONFIG_PATH` requirements as `SKILL.md`, so
+  scanners do not see a mismatch between package metadata and runtime
+  instructions
 
 For optional voice/TTS host integration, see
 [docs/host-voice-integration.md](docs/host-voice-integration.md).
@@ -296,7 +300,7 @@ If you want a one-line package fetch through npm without waiting for a public np
 registry publish, install directly from the GitHub repository:
 
 ```bash
-npm install github:redwakame/openclaw-continuity#v2.0.12
+npm install github:redwakame/openclaw-continuity#v2.0.13
 ```
 
 This fetches the release source through npm's GitHub transport path.

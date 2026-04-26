@@ -54,7 +54,7 @@ Technical package / slug:
 
 ## GitHub release title
 
-- `OpenClaw Continuity 2.0.12`
+- `OpenClaw Continuity 2.0.13`
 
 ## GitHub release notes
 
@@ -79,6 +79,8 @@ closure, cooldown, time-aware wording, and frontstage-safe proactive behavior.
   sleep near `sleep_time` and `wake_time` is still later on the same local day,
   the runtime nudges the model toward a same-day “after you wake” handoff rather
   than a generic next-day goodbye
+- aligns ClawHub registry metadata with `SKILL.md` runtime requirements
+  (`macOS/Linux`, `python3`, `OPENCLAW_STATE_DIR`, and `OPENCLAW_CONFIG_PATH`)
 
 #### Why it matters
 
@@ -105,6 +107,8 @@ turning ordinary conversation into noisy system chatter.
 - 修復晚睡型作息的睡前交接：當使用者接近 `sleep_time` 說要睡，而
   `wake_time` 仍在同一本地日期稍晚時，runtime 會引導成「下午見／起床後再接」，
   不再讓模型套用泛用的隔天道別
+- 對齊 ClawHub registry metadata 與 `SKILL.md` 的 runtime requirements：
+  `macOS/Linux`、`python3`、`OPENCLAW_STATE_DIR`、`OPENCLAW_CONFIG_PATH`
 
 #### 為什麼重要
 
