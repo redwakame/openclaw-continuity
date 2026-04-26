@@ -215,6 +215,9 @@ These are now part of the A-bucket public package, not just lab-only patches:
   templates and near-live QA runners remain in the GitHub source for maintainers,
   but are excluded from the ClawHub install bundle so normal installs do not carry
   optional high-privilege examples.
+- ClawHub registry metadata now also uses the top-level `metadata.requires`
+  schema expected by the ClawHub scanner, while keeping OpenClaw-specific
+  metadata for runtime readers.
 
 For optional voice/TTS host integration, see
 [docs/host-voice-integration.md](docs/host-voice-integration.md).
@@ -304,7 +307,7 @@ If you want a one-line package fetch through npm without waiting for a public np
 registry publish, install directly from the GitHub repository:
 
 ```bash
-npm install github:redwakame/openclaw-continuity#v2.0.14
+npm install github:redwakame/openclaw-continuity#v2.0.15
 ```
 
 This fetches the release source through npm's GitHub transport path.

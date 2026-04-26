@@ -54,7 +54,7 @@ Technical package / slug:
 
 ## GitHub release title
 
-- `OpenClaw Continuity 2.0.14`
+- `OpenClaw Continuity 2.0.15`
 
 ## GitHub release notes
 
@@ -85,6 +85,8 @@ closure, cooldown, time-aware wording, and frontstage-safe proactive behavior.
 - publishes a portable-core ClawHub bundle: host-only operator templates and
   near-live QA runners remain available in GitHub source, but are excluded from
   normal ClawHub installs
+- declares runtime requirements through the ClawHub top-level
+  `metadata.requires` schema and the OpenClaw-specific metadata path
 
 #### Why it matters
 
@@ -115,6 +117,8 @@ turning ordinary conversation into noisy system chatter.
   `macOS/Linux`、`python3`、`OPENCLAW_STATE_DIR`、`OPENCLAW_CONFIG_PATH`
 - ClawHub 安裝包改為 portable core：host-only operator templates 與 near-live
   QA runner 保留在 GitHub 原始碼，但不放進一般 ClawHub 安裝包
+- runtime requirements 同時寫入 ClawHub top-level `metadata.requires`
+  schema 與 OpenClaw-specific metadata path
 
 #### 為什麼重要
 

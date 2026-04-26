@@ -1,6 +1,6 @@
 {
   "name": "personal-hooks",
-  "version": "2.0.14",
+  "version": "2.0.15",
   "description": "OpenClaw Continuity is a time-aware continuity and follow-up skill package with /new carryover, staged memory, tracked events, natural-language setting changes, and structured writeback.",
   "author": "Ice Fish",
   "license": "MIT-0",
@@ -18,6 +18,19 @@
     "guided-settings",
     "carryover"
   ],
+  "os": [
+    "darwin",
+    "linux"
+  ],
+  "requires": {
+    "bins": [
+      "python3"
+    ],
+    "env": [
+      "OPENCLAW_STATE_DIR",
+      "OPENCLAW_CONFIG_PATH"
+    ]
+  },
   "openclaw": {
     "os": [
       "darwin",

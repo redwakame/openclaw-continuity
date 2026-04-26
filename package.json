@@ -1,6 +1,6 @@
 {
   "name": "@redwakame-skill/openclaw-continuity",
-  "version": "2.0.14",
+  "version": "2.0.15",
   "private": false,
   "description": "OpenClaw Continuity is a time-aware continuity and follow-up skill package with /new carryover, staged memory, tracked events, natural-language setting changes, and structured writeback.",
   "author": {
