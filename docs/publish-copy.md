@@ -11,7 +11,7 @@ Channel delivery belongs to the OpenClaw host and adapter configuration.
 
 - Public product name: `OpenClaw Continuity`
 - Technical package / slug: `personal-hooks`
-- Current local version target: `2.0.18`
+- Current local version target: `2.0.19`
 - Contact: `adarobot666@gmail.com`
 - Product illustration: `assets/publish/product-story-bilingual.svg`
 - Setup wizard comic: `assets/publish/comic-01-setup-wizard.svg`
@@ -269,7 +269,7 @@ Recommended order:
 
 ### English
 
-`OpenClaw Continuity 2.0.18` focuses the public package on the portable skill
+`OpenClaw Continuity 2.0.19` focuses the public package on the portable skill
 core and expands the product-facing documentation.
 
 Highlights:
@@ -286,7 +286,7 @@ Highlights:
 
 ### 中文
 
-`OpenClaw Continuity 2.0.18` 聚焦公開技能核心，並補齊產品化說明。
+`OpenClaw Continuity 2.0.19` 聚焦公開技能核心，並補齊產品化說明。
 
 重點：
 
