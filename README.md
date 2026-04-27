@@ -10,6 +10,20 @@ chat-platform adapter.
 
 ![OpenClaw Continuity product story](assets/publish/product-story-bilingual.svg)
 
+## Four Quick Comics
+
+These four panels show the parts that matter most after someone installs the
+skill: guided setup, later adjustment, natural-language setting changes, and
+precise command changes.
+
+![Install and setup wizard](assets/publish/comic-01-setup-wizard.svg)
+
+![Adjust settings anytime](assets/publish/comic-02-adjust-anytime.svg)
+
+![Natural-language setting changes](assets/publish/comic-03-natural-language-settings.svg)
+
+![Precise command setting changes](assets/publish/comic-04-command-settings.svg)
+
 ## For Everyone
 
 Most agents can answer a message. The harder part is remembering what still
@@ -155,6 +169,8 @@ OpenClaw reply pipeline without becoming tied to one chat surface.
 First install can enter guided setup when required fields or first-run preference
 fields are missing.
 
+![Install and setup wizard](assets/publish/comic-01-setup-wizard.svg)
+
 The setup flow covers:
 
 - `timezone`
@@ -186,7 +202,11 @@ not add a voice engine, image model, or channel adapter to this skill package.
 
 ## Change Settings Later
 
+![Adjust settings anytime](assets/publish/comic-02-adjust-anytime.svg)
+
 Natural language:
+
+![Natural-language setting changes](assets/publish/comic-03-natural-language-settings.svg)
 
 ```text
 Help me adjust my follow-up settings.
@@ -198,6 +218,8 @@ Use the last user intent when a new conversation starts.
 ```
 
 Command-style:
+
+![Precise command setting changes](assets/publish/comic-04-command-settings.svg)
 
 ```bash
 python3 scripts/personal_hooks.py setup-check

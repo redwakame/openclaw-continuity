@@ -14,6 +14,10 @@ Channel delivery belongs to the OpenClaw host and adapter configuration.
 - Current local version target: `2.0.16`
 - Contact: `adarobot666@gmail.com`
 - Product illustration: `assets/publish/product-story-bilingual.svg`
+- Setup wizard comic: `assets/publish/comic-01-setup-wizard.svg`
+- Adjust-anytime comic: `assets/publish/comic-02-adjust-anytime.svg`
+- Natural-language settings comic: `assets/publish/comic-03-natural-language-settings.svg`
+- Command settings comic: `assets/publish/comic-04-command-settings.svg`
 
 ## One-Line Positioning
 
@@ -167,6 +171,10 @@ Do not advertise a channel matrix inside the skill listing.
 
 ## Setup Wizard Copy
 
+Recommended image:
+
+- `assets/publish/comic-01-setup-wizard.svg`
+
 First install can guide the user through:
 
 - timezone
@@ -241,16 +249,21 @@ Expected:
 Recommended order:
 
 1. Product promise and bilingual comic image
-2. "For Everyone" explanation
-3. Example of `/new` continuity
-4. Full feature list
-5. Scope boundary
-6. Setup wizard
-7. Natural-language and command settings
-8. Install
-9. Verify
-10. Technical map
-11. Contact and star request
+2. Four quick comics:
+   - setup wizard
+   - adjust anytime
+   - natural-language settings
+   - command settings
+3. "For Everyone" explanation
+4. Example of `/new` continuity
+5. Full feature list
+6. Scope boundary
+7. Setup wizard
+8. Natural-language and command settings
+9. Install
+10. Verify
+11. Technical map
+12. Contact and star request
 
 ## GitHub Release Notes Draft
 
@@ -267,7 +280,7 @@ Highlights:
 - documents natural-language and command-style setting changes
 - clarifies that channel delivery belongs to the OpenClaw host/adapter
 - keeps public copy free of untested external-channel claims
-- includes a bilingual product-story illustration
+- includes a bilingual product-story illustration and four focused setup/settings comics
 - keeps the regression harness at `14/14` expected pass
 
 ### 中文
