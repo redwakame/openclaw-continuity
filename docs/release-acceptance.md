@@ -9,7 +9,6 @@ Pass this matrix before publishing to GitHub release ZIP, ClawHub-style catalog,
 This matrix validates the **public package**:
 
 - shared skill
-- optional public bridge addon
 - package docs / install flow
 
 It does **not** require mutating any live host memory or production session history.
@@ -41,15 +40,16 @@ Pass if:
 
 Run at least:
 
-- explicit IANA timezone: `America/New_York`
-- generic offset: `UTC+8` or `GMT+8`
+- explicit IANA timezone: `Europe/Berlin`
+- generic offset: `UTC+0` or `GMT+0`
 
 Pass if:
 
 - explicit IANA timezone is preserved as given
-- generic offset is stored as a generic fixed offset such as `UTC+08:00`
+- generic offset is stored as a generic fixed offset such as `UTC+00:00`
 - generic offsets are not silently converted into a city timezone
-- explicit place references such as `Taipei` may still map to `Asia/Taipei`
+- natural-language place names are not silently inferred unless the host config
+  supplies an explicit mapping
 
 ### 3. Deterministic onboarding writeback
 
@@ -105,18 +105,16 @@ Pass if the user-visible path does not leak:
 - structured-state labels
 - mixed-language contamination created by the package itself
 
-### 7. Host-addon sync
+### 7. Host/adapter boundary
 
-If the optional bridge addon is included in the published package, validate the package as a pair:
-
-- skill version
-- bridge version
+If a host adapter is used for live delivery, validate it separately from the
+portable skill package.
 
 Pass if:
 
-- the bridge does not force a host language by default
-- the bridge forwards `time_modifier_prompt` and low-information continuity guard
-- the bridge still blocks internal leakage on outbound delivery
+- the host adapter does not force a host language by default
+- the host adapter forwards `time_modifier_prompt` and low-information continuity guard when applicable
+- the host adapter does not re-send internal runtime text after the skill/tool-layer guard
 
 ## Minimum release evidence
 
@@ -124,7 +122,7 @@ Ship with:
 
 - one sandbox report covering routing / writeback / `/new`
 - one neutrality report covering language and timezone/offset checks
-- one addon sync note if the bridge addon is bundled
+- one host/adapter boundary note if live channel delivery is demonstrated
 
 ## Fail policy
 

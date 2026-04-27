@@ -71,6 +71,31 @@
         "top_summary_only": { "type": "boolean" }
       }
     },
+    "new_session_continuity": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Selects which continuity anchor leads when /new starts. Routine/time context remains support-only.",
+      "properties": {
+        "mode": {
+          "type": ["string", "null"],
+          "enum": ["recent_4_turns_first", "last_user_intent_first", "followup_focus_first", "assistant_commitment_first", "balanced", null]
+        }
+      }
+    },
+    "modality_continuity": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Host-neutral preference for preserving voice/image discussion style when the host already supports it.",
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "mode": {
+          "type": ["string", "null"],
+          "enum": ["preserve_when_supported", "text_only", "ask_each_time", null]
+        },
+        "voice_reply_on_voice_thread": { "type": "boolean" },
+        "image_context_carryover": { "type": "boolean" }
+      }
+    },
     "dispatch": {
       "type": "object",
       "additionalProperties": false,

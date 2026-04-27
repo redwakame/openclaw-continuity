@@ -1,8 +1,8 @@
 {
   "name": "personal-hooks",
-  "version": "2.0.15",
+  "version": "2.0.16",
   "description": "OpenClaw Continuity is a time-aware continuity and follow-up skill package with /new carryover, staged memory, tracked events, natural-language setting changes, and structured writeback.",
-  "author": "Ice Fish",
+  "author": "OpenClaw Continuity Maintainers",
   "license": "MIT-0",
   "homepage": "https://github.com/redwakame/openclaw-continuity",
   "repository": "https://github.com/redwakame/openclaw-continuity",

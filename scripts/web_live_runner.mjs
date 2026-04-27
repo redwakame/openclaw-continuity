@@ -28,7 +28,7 @@ const LIVE_SCRIPT_PATH = path.join(
 const RUNTIME_ROOT = path.join(LIVE_ROOT, "runtime-src", "openclaw-v2026.3.13");
 const DIST_ENTRY = path.join(RUNTIME_ROOT, "dist", "index.js");
 const REPORT_DIR = path.join(LIVE_DATA_DIR, "web-live-reports");
-const TAIPEI_OFFSET = "+08:00";
+const LOCAL_TEST_OFFSET = "+00:00";
 const SKILL_HEADINGS = Array.from(
   new Set(
     [
@@ -165,8 +165,8 @@ function readJsonl(filePath) {
 }
 
 function isoLocal(now = new Date()) {
-  const local = new Date(now.getTime() + 8 * 60 * 60 * 1000);
-  return `${local.toISOString().slice(0, 19)}${TAIPEI_OFFSET}`;
+  const local = new Date(now.getTime());
+  return `${local.toISOString().slice(0, 19)}${LOCAL_TEST_OFFSET}`;
 }
 
 function extractTextFromMessage(message) {
@@ -1074,7 +1074,7 @@ async function main() {
         shared_pipeline: [
           "build_runtime_context()",
           "personal_hooks.py",
-          "MiniMax/ordinary reply model call",
+          "host ordinary reply model call",
           "reply assembly",
         ],
         channel_specific: [

@@ -19,7 +19,7 @@ It exists so proactive follow-up behavior does not rely only on inferred memory 
 ```json
 "routine_schedule": {
   "enabled": false,
-  "timezone": "Asia/Taipei",
+  "timezone": "UTC",
   "sleep_time": "05:30",
   "wake_time": "15:00",
   "wake_window_minutes": 90,

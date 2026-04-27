@@ -36,7 +36,12 @@ Questions, feedback, or implementation discussion: `adarobot666@gmail.com`.
   - `followup_focus_code`
   - `writeback_policy`
 - Promote `candidate -> incident -> hook`.
-- Preserve `/new` carryover from the previous 3-5 turns.
+- Preserve `/new` carryover from the previous 3-5 turns and let the user
+  choose which continuity anchor leads a new conversation.
+- Preserve voice/image discussion style as a host-neutral preference when the
+  OpenClaw host already supports those modalities. This skill records the
+  preference only; it does not bundle a voice engine, image model, or channel
+  adapter.
 - Keep hook closure, cooldown, dedupe, dispatch cap, and sleep/rest suppress observable.
 - Write concise daily-memory traces for staged and tracked items.
 - Apply first-run setup facts deterministically from explicit user text.
@@ -90,31 +95,22 @@ Use this skill when the user is naturally:
 - Keep language routing explicit. English prompt/guard text should stay English,
   and ordinary user phrases must not be rewritten into mixed-language internal
   artifacts.
-- Do not hard-bind generic `UTC/GMT` offsets to a city timezone. Only explicit
-  place references such as `Taipei` should resolve to `Asia/Taipei`; generic
-  offsets must stay generic fixed offsets such as `UTC+08:00`.
+- Do not hard-bind generic `UTC/GMT` offsets to a city timezone. Explicit IANA
+  zones should pass through unchanged; generic offsets must stay generic fixed
+  offsets such as `UTC+00:00`.
 - Prefer language from the current user turn and existing structured state over
   a host default. The public package ships first-party zh-TW / zh-CN / English
   behavior and broad guided-settings entry coverage for a few other common
   languages; it does not claim full prose localization for every language.
 
 The public skill package does **not** automatically provide host-side delivery
-plumbing. Keep these boundaries explicit:
+plumbing. Keep this boundary explicit:
 
-- **TG bridge / outbound last-defense**
-  - host-side outbound interception before the final channel send
-- **gateway hook wiring**
-  - host/runtime lifecycle integration for `preagent-sync`, `runtime-context`,
-    and `frontstage-guard`
-- **voice send addon**
-  - optional TTS/media delivery integration
-- **live heartbeat host glue**
-  - host/runtime heartbeat configuration for safe background follow-up
-
-These are optional host integrations, not part of the portable skill core.
-ClawHub installs publish the portable core only; GitHub source keeps operator
-templates and local QA runners for maintainers who explicitly need host-side
-integration examples.
+- This package owns continuity state, memory routing, `/new` carryover, setup,
+  and skill/tool-layer guards.
+- The OpenClaw host and adapter configuration own final message delivery.
+- Do not advertise a matrix of external chat platforms inside the public skill
+  copy unless those host adapters are tested separately.
 
 ## Entry points
 
@@ -127,7 +123,7 @@ integration examples.
 - `due` / `render` / `complete`
   - Drive the hook lifecycle.
 
-Use `README.md` for installation and package usage. Use `docs/harness.md` for reproducible verification. Use `docs/release-acceptance.md` for the publication gate. Use `docs/live-qa-runbook.md` for human TG acceptance. Use `docs/v2-blueprint.md` only for future design discussion.
+Use `README.md` for installation and package usage. Use `docs/harness.md` for reproducible verification. Use `docs/release-acceptance.md` for the publication gate. Use `docs/live-qa-runbook.md` for human channel acceptance. Use `docs/v2-blueprint.md` only for future design discussion.
 
 ## Setup & Configuration
 
@@ -202,6 +198,8 @@ Keep the guided categories simple and host-agnostic:
 - `schedule` / `作息`
 - `proactive` / `主動關心`
 - `tracking` / `追蹤記憶`
+- `continuity` / `新對話承接`
+- `modality` / `語音／圖片延續偏好`
 - `tone` / `互動風格`
 
 The user should be able to answer naturally rather than memorize technical keys.
@@ -218,18 +216,22 @@ conversation, the skill should deterministically extract and apply at least:
 - wake_time
 - relationship
 - use_case
+- new_session_continuity_mode
+- modality_continuity_mode
 
 These values should be written into:
 
 - `settings.json` (`routine_schedule`)
+- `settings.json` (`new_session_continuity`)
+- `settings.json` (`modality_continuity`)
 - `profile.json` (`care_style.relationship`)
 - `USER.md`
 
 This makes the setup contract cross-version safe even when model behavior is
 conservative.
 
-The skill also strips the common webchat timestamp prefix
-`[Wed 2026-04-15 05:25 GMT+8]` before deterministic parsing so the same setup
+The skill also strips common webchat timestamp prefixes such as
+`[Wed 2026-04-15 05:25 GMT+0]` before deterministic parsing so the same setup
 text behaves consistently across CLI and web hosts.
 
 ### Trigger phrases (detect and act)
@@ -244,6 +246,9 @@ When the user says any of the following, run `setup-check` and offer to update:
 - "改勿擾時間" / "quiet hours" / "do not disturb"
 - "改關心頻率" / "多久關心一次" / "care interval"
 - "改時區" / "change timezone"
+- "新對話承接改成最近 4 輪摘要" / "use recent 4 turns after /new"
+- "新對話改成看最後使用者意圖" / "use the last user intent after /new"
+- "語音或圖片討論延續時跟隨可用能力" / "preserve voice or image discussion when supported"
 - "我搬家了" / "我換工作了" (may affect timezone/schedule)
 
 For English natural-language settings requests, the shared skill should also
@@ -270,6 +275,8 @@ handle common phrasings such as:
 | emoji_forbidden | profile | Banned emoji list |
 | tracking_keywords | profile | Topics to track |
 | heartbeat_enabled | settings | Enable heartbeat |
+| new_session_continuity_mode | settings | Which continuity anchor leads after `/new` |
+| modality_continuity_mode | settings | How voice/image discussion style should carry over when the host supports it |
 
 ### New-session continuity constraints
 

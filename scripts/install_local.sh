@@ -59,5 +59,5 @@ Suggested settings starting point:
 If you want a custom writable settings path, set:
   PERSONAL_HOOKS_SETTINGS_PATH=/path/to/settings.json
 
-This helper does not modify Telegram, channels, or live state.
+This helper does not modify channel delivery, credentials, or live state.
 EOF

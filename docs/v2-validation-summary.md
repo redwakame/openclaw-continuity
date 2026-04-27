@@ -85,7 +85,7 @@ The package was rechecked for:
 - private test terms
 - live workspace paths
 - personal identifiers
-- session id / TG id residue
+- session id / channel destination residue
 
 No blocker-level public contamination remained after cleanup.
 
@@ -98,4 +98,4 @@ Before release, also run the explicit matrix in [release-acceptance.md](release-
 - language neutrality
 - timezone / generic-offset neutrality
 - `/new` followed by bare `hi` / `嗨`
-- host-addon sync when a bridge addon is installed
+- host/adapter boundary checks when live channel delivery is demonstrated

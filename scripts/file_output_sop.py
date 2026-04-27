@@ -9,7 +9,6 @@ from send2trash import send2trash
 
 DESTINATION_MAP = {
     "screenshot": "assistant-workspace/captures",
-    "audio": "assistant-workspace/audio",
     "webpage": "assistant-workspace/web-cache",
     "download": "assistant-workspace/downloads",
     "monitor_report": "assistant-workspace/monitoring",

@@ -34,6 +34,15 @@
     "max_turns": 5,
     "top_summary_only": true
   },
+  "new_session_continuity": {
+    "mode": null
+  },
+  "modality_continuity": {
+    "enabled": true,
+    "mode": null,
+    "voice_reply_on_voice_thread": true,
+    "image_context_carryover": true
+  },
   "dispatch": {
     "cooldown_minutes": 180,
     "cap": 3

@@ -1,6 +1,6 @@
-# Host Frontstage Stopgap
+# Channel Boundary Stopgap
 
-This document covers the **host/live stopgap** for two classes of outbound
+This document covers the **channel boundary stopgap** for two classes of outbound
 leakage that the public skill alone cannot fully stop:
 
 1. `<final> ... </final>` tags appearing in user-visible output
@@ -25,7 +25,7 @@ The skill should **not** own:
 - platform-specific delivery routing
 - language-specific personal preferences such as Simplified→Traditional rewrite
 
-## Recommended host stopgap
+## Recommended channel boundary stopgap
 
 At the host layer, add a final outbound guard with these behaviors:
 
@@ -39,7 +39,7 @@ At the host layer, add a final outbound guard with these behaviors:
    - `message_sending`
    - heartbeat delivery persistence (for example `lastHeartbeatText`)
 
-## Why this is host-side
+## Why this is outside the skill core
 
 The skill runs during generation, but heartbeat delivery and final outbound
 payloads may be resolved later by gateway/runtime code. If the host does not
@@ -58,6 +58,6 @@ For a new host, verify all of the following:
 
 ## Release note
 
-This stopgap is included as **host guidance**, not as a public skill promise.
+This stopgap is included as **boundary guidance**, not as a public skill promise.
 The public package is allowed to ship the guidance and validation steps without
 claiming it can guarantee all host frontstage safety by itself.

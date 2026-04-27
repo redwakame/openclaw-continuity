@@ -57,7 +57,7 @@ Bridge integration depends on:
 
 | Path in openclaw.json | Purpose |
 |----------------------|---------|
-| `plugins.entries["memory-lancedb-pro"].config.embedding` | Embedding API credentials (apiKey, model, baseURL) |
+| `plugins.entries["memory-lancedb-pro"].config.embedding` | Embedding provider credentials (apiKey, model, baseURL) |
 | `agents.defaults.heartbeat.*` | Heartbeat interval, isolation, directPolicy |
 
 ### 1.6 Outbound / Channel Routing (LOW impact)

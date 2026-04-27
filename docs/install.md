@@ -108,7 +108,7 @@ the skill into a Node-only runtime package.
 The repository also includes `_meta.json` so the package can be indexed by
 ClawHub-style skill catalogs without changing the runtime payload.
 
-## Default vs optional host addon
+## Default vs host integration
 
 Default installation installs the **skill package only**.
 
@@ -118,17 +118,9 @@ It does **not** automatically:
 - patch gateway runtime files
 - change outbound channel behavior
 
-If you want the host-side stopgap for `<final>` / weird heartbeat text, use the
-optional addon shipped in this package:
-
-- `addons/host-frontstage-stopgap/`
-
-If you want host-side voice/TTS templates, use the optional addon:
-
-- `addons/host-voice-send-template/`
-
-That addon is opt-in and should be applied by the host/operator only after
-reviewing the host boundary docs.
+If you need host-side outbound filtering or channel delivery behavior, implement
+and test it in the host adapter for your own deployment. This package does not
+ship an installable channel bridge.
 
 If the host uses background heartbeat pushes, also configure heartbeat session
 isolation in `openclaw.json`:
@@ -141,8 +133,8 @@ isolation in `openclaw.json`:
         "id": "main",
         "heartbeat": {
           "every": "30m",
-          "target": "telegram",
-          "to": "[CHAT_ID]",
+          "target": "direct-channel",
+          "to": "[CHANNEL_DESTINATION]",
           "directPolicy": "allow",
           "lightContext": true,
           "isolatedSession": true
@@ -153,7 +145,7 @@ isolation in `openclaw.json`:
 }
 ```
 
-Use `target: "telegram"` when you are routing to an explicit Telegram chat id.
+Use `target: "direct-channel"` when you are routing to an explicit channel destination.
 If you want the gateway to reuse the last external session instead, use
 `target: "last"` and omit `to`.
 
@@ -165,15 +157,10 @@ Before enabling it in production, verify the session/transcript behavior on the
 exact OpenClaw version you are running. Heartbeat isolation is useful, but host
 implementations and transcript handling can differ by version.
 
-If the host uses the optional frontstage stopgap bridge, keep that addon synced
-with the shared skill version. Recent public-package fixes rely on the bridge
-also injecting:
-
-- `time_modifier_prompt`
-- post-`/new` low-information continuity guard
-
-Without the matching bridge version, web hosts may miss some of the
-continuity/tone protections that the shared skill now exposes.
+If the host adapter contributes runtime context, keep that integration aligned
+with the shared skill version. Recent public-package fixes rely on host runtime
+context preserving `time_modifier_prompt` and the post-`/new`
+low-information continuity guard when those surfaces are available.
 
 ### Simple rule of thumb
 
@@ -181,9 +168,8 @@ Installing the skill alone gives you the shared follow-up/continuity engine.
 
 If you also want full live channel behavior, the host may still need to wire:
 
-- **TG bridge / outbound last-defense**
+- **Channel bridge / outbound last-defense**
 - **gateway hook wiring**
-- **voice send addon** (optional)
 - **live heartbeat host glue**
 
 Those pieces are host/operator work. They are not auto-applied by the portable
@@ -228,6 +214,8 @@ package now expects the shared skill to own these fields directly:
   - `wake_time`
   - `relationship`
   - `use_case`
+  - `new_session_continuity_mode`
+  - `modality_continuity_mode`
 - guided settings:
   - `proactive_chat.enabled`
   - `proactive_chat.interval_hours`
@@ -236,6 +224,8 @@ package now expects the shared skill to own these fields directly:
   - `re_engagement.retry_after_hours`
   - `re_engagement.max_unanswered_before_park`
   - `routine_schedule.phases.active_day.interval_hours`
+  - `new_session_continuity.mode`
+  - `modality_continuity.mode`
 
 `experimental.rhythm_nudge.enabled` is intentionally `false` by default and is not required for the public package.
 
@@ -279,12 +269,9 @@ The intended public V2 path is:
 
 Channel-specific delivery is optional for package validation and is not required for the core skill behavior.
 
-If you want channel-facing frontstage stopgap behavior, use the optional host
-addon. The skill package itself stays portable and channel-neutral.
-
-If you want voice/TTS delivery, use the optional host voice addon template and
-adapt it to your provider/channel combination. The public skill does not assume
-that every model or channel supports voice output directly.
+If you want channel-facing frontstage stopgap behavior, implement it in the host
+bridge for your channel. The skill package itself stays portable and
+channel-neutral.
 
 ## Common troubleshooting
 

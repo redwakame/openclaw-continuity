@@ -4,12 +4,12 @@
 
 This document clarifies what belongs to the **public skill** (shared, portable)
 and what belongs to the **host gateway / bridge** (private, instance-specific).
-A public skill cannot claim it automatically guarantees host frontstage safety;
-the host must wire its own bridge hooks. See also
-[`host-frontstage-stopgap.md`](host-frontstage-stopgap.md) for the minimal
-host-side stopgap used to suppress `<final>` leakage and weird heartbeat text,
-and [`host-operator-settings.md`](host-operator-settings.md) for the operator
-knobs that should be configured at the host/runtime level.
+A public skill cannot claim it automatically guarantees channel frontstage
+safety; the host must wire its own bridge hooks. See also
+[`channel-boundary-stopgap.md`](channel-boundary-stopgap.md) for the minimal
+channel-boundary stopgap used to suppress `<final>` leakage and weird heartbeat
+text, and [`host-operator-settings.md`](host-operator-settings.md) for the
+operator knobs that should be configured at the host/runtime level.
 
 ---
 
@@ -26,7 +26,7 @@ These files ship with the skill and contain **no host-specific references**.
 | `config.schema.json` | Skill configuration schema |
 | `docs/*` | Documentation |
 
-**Rule**: No `ada_*`, no gateway port numbers, no TG chat IDs, no agent IDs
+**Rule**: No host-specific IDs, no gateway port numbers, no channel destination IDs, no agent IDs
 in this layer. Temp-dir prefixes use `ph-` (personal-hooks).
 
 ---
@@ -60,12 +60,7 @@ They are instance-specific and NOT part of the public skill.
    Without it, heartbeat prompts / dispatch context / internal narration can
    re-enter the same continuity store used by ordinary user replies.
 
-5. **voice/media delivery** — rendering TTS and sending media through Telegram,
-   Discord, LINE, WhatsApp, or other channels is host-specific. The public
-   skill can provide the final text and a handoff contract, but the host must
-   own provider/channel execution.
-
-6. **new-session startup bootstrap** — when a host starts a fresh `/new` or
+5. **new-session startup bootstrap** — when a host starts a fresh `/new` or
    `/reset` session and no real human text exists yet, the host must not
    synthesize a fake user utterance just to drive startup logic. The safe
    startup path is:
@@ -90,12 +85,10 @@ mechanism. They do **not** automatically get every host/live integration.
 
 The missing host pieces are usually:
 
-- **TG bridge / outbound last-defense**
+- **Channel bridge / outbound last-defense**
   - the final outbound interception layer before channel delivery
 - **gateway hook wiring**
   - the lifecycle hookup that makes the skill run at the right reply stages
-- **voice send addon**
-  - optional voice/TTS/media delivery
 - **live heartbeat host glue**
   - heartbeat scheduling/isolation/delivery wiring for reliable background
     follow-up
@@ -145,11 +138,11 @@ when the visible outbound message is clean. The correct host fix is to set
 ## Deployment checklist for a new host
 
 1. Install skill to `workspace/skills/personal-hooks/`
-2. Copy bridge template to `workspace/plugins/personal-hooks-bridge/`
+2. Wire a host bridge at `workspace/plugins/personal-hooks-bridge/`
 3. Configure `agents.defaults.heartbeat` in `openclaw.json`
 4. Set `heartbeat.isolatedSession=true` for any host that uses background heartbeat pushes
 5. Verify `message_sending` hook fires: look for `message_sending MODIFY` in gateway logs
-6. Verify heartbeat delivery: check `sendMessage ok` entries after first tick
+6. Verify heartbeat delivery: check channel-delivery ACK entries after first tick
 7. Verify heartbeat runs are using `:heartbeat` isolated sessions instead of the main direct session
 8. Verify `<final>` tags and heartbeat narration are stripped from final outbound text
 9. Verify `/new` startup does **not** invent fake user text before the first

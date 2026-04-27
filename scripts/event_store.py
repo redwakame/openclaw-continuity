@@ -1215,7 +1215,7 @@ def main():
     elif cmd == "entry":
         text = _get_flag(args, "--text") or ""
         session = _get_flag(args, "--session") or ""
-        channel = _get_flag(args, "--channel") or "telegram"
+        channel = _get_flag(args, "--channel") or "direct-channel"
         result = process_event_entry(store, text, session_key=session, channel=channel)
         print(json.dumps(result, ensure_ascii=False, indent=2))
 

@@ -298,6 +298,8 @@ For a portable install, the simplest order is:
 2. create a writable runtime settings file from `examples/settings.sample.json`
 3. tune:
    - `carryover.max_turns`
+   - `new_session_continuity.mode`
+   - `modality_continuity.mode`
    - `dispatch.cooldown_minutes`
    - `proactive_chat.*`
    - `routine_schedule.*`
@@ -323,8 +325,8 @@ Recommended host heartbeat shape:
 {
   "heartbeat": {
     "every": "30m",
-    "target": "telegram",
-    "to": "[CHAT_ID]",
+    "target": "direct-channel",
+    "to": "[CHANNEL_DESTINATION]",
     "directPolicy": "allow",
     "lightContext": true,
     "isolatedSession": true
@@ -343,9 +345,3 @@ The following should still be treated as host/live integration work:
 - dynamic work-DND state
 - channel-specific outbound delivery rules
 - final outbound cleanup such as `<final>` / heartbeat leakage interception
-- model/provider-specific TTS or media delivery
-
-For voice/TTS integration, see:
-
-- `docs/host-voice-integration.md`
-- `addons/host-voice-send-template/`

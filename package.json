@@ -1,12 +1,12 @@
 {
   "name": "@redwakame-skill/openclaw-continuity",
-  "version": "2.0.15",
+  "version": "2.0.16",
   "private": false,
   "description": "OpenClaw Continuity is a time-aware continuity and follow-up skill package with /new carryover, staged memory, tracked events, natural-language setting changes, and structured writeback.",
   "author": {
-    "name": "Ice Fish",
+    "name": "OpenClaw Continuity Maintainers",
     "email": "adarobot666@gmail.com",
-    "url": "https://github.com/redwakame"
+    "url": "https://github.com/redwakame/openclaw-continuity"
   },
   "license": "MIT-0",
   "repository": {
@@ -33,10 +33,16 @@
     "_meta.json",
     "config.schema.json",
     "requirements.txt",
-    "scripts",
+    "scripts/event_store.py",
+    "scripts/file_output_sop.py",
+    "scripts/followup_skill_harness.py",
+    "scripts/install_local.sh",
+    "scripts/personal_hooks.py",
+    "scripts/proactive_control.py",
+    "scripts/semantic_config.py",
+    "assets",
     "docs",
     "examples",
-    "addons",
     "references",
     "validation"
   ],

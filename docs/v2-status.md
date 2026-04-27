@@ -57,7 +57,7 @@ See also [v2-known-limits.md](v2-known-limits.md) for the condensed reviewer-fac
 - language neutrality at the public-package level
 - timezone / offset neutrality at the public-package level
 - `/new` + low-information greeting behavior under the release acceptance matrix
-- host-addon sync checks for web/live hosts when the addon is installed
+- host/adapter boundary checks for web/live hosts when live delivery is demonstrated
 
 ## Recommended next step
 

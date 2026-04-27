@@ -55,7 +55,6 @@ For current release state, read:
 ## Experimental or opt-in areas
 
 - `experimental.rhythm_nudge.*`
-- host-side addons under `addons/`
 - design-only notes under `docs/v2-blueprint.md`
 
 ## Recommended review order

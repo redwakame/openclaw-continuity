@@ -27,10 +27,10 @@ python3 scripts/followup_skill_harness.py --absence-minutes 3
 
 Add at least one sandbox run for each of these:
 
-- zh-TW onboarding with an explicit non-Taipei timezone such as `America/New_York`
-- English onboarding with the same explicit non-Taipei timezone
-- generic offset onboarding such as `UTC+8` / `GMT+8` and confirm the stored
-  value stays a generic fixed offset (for example `UTC+08:00`), not a city zone
+- zh-TW onboarding with an explicit IANA timezone such as `Europe/Berlin`
+- English onboarding with the same explicit IANA timezone
+- generic offset onboarding such as `UTC+0` / `GMT+0` and confirm the stored
+  value stays a generic fixed offset (for example `UTC+00:00`), not a city zone
 - `/new` followed by a bare `hi` / `嗨` and confirm continuity stays thread-led
   rather than collapsing into generic time-of-day chatter
 

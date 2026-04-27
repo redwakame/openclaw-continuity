@@ -4,9 +4,9 @@
       "memory-lancedb-pro": {
         "config": {
           "embedding": {
-            "apiKey": "${JINA_API_KEY}",
-            "model": "jina-embeddings-v4",
-            "baseURL": "https://api.jina.ai/v1",
+            "apiKey": "${EMBEDDING_API_KEY}",
+            "model": "embedding-model-name",
+            "baseURL": "https://embedding-provider.example/v1",
             "dimensions": 1024,
             "taskQuery": "retrieval.query",
             "taskPassage": "retrieval.passage",
