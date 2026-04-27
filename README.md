@@ -349,12 +349,19 @@ Main runtime surfaces:
 
 ## Contact
 
-Questions, feedback, and implementation discussion:
+If you are interested in this package, run into a problem, or want to exchange
+ideas about OpenClaw continuity, feel free to contact me:
 
 - `adarobot666@gmail.com`
 
-If this package helps and you want to keep improvements and maintenance moving,
-please star the GitHub repository.
+If you are satisfied with this skill package, please star the GitHub repository
+as encouragement. I will keep pushing improvements, maintenance, and new
+features.
 
-如果這個技能對你有幫助，而且你也期待它持續優化與維護，歡迎在 GitHub
-給一顆星，這會是最直接的支持。
+如果你對這個技能包有興趣、使用時遇到問題，或想交流 OpenClaw continuity
+相關想法，歡迎聯繫我：
+
+- `adarobot666@gmail.com`
+
+如果你滿意這個技能包，也歡迎在 GitHub 給一顆星作為鼓勵。我會持續推動
+優化、維護與新功能追加。
