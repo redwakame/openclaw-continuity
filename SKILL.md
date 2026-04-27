@@ -1,10 +1,39 @@
 ---
 name: personal-hooks
 description: Structured continuity and follow-up skill for OpenClaw agents. Use when an agent needs to decide whether natural user dialogue should stay as casual chat, become staged memory, or become tracked follow-up with carryover, closure, cooldown, sleep/rest suppress, routine-aware wording, quiet-hours behavior, traceability, and release-grade frontstage safety guards. This package is not a generic cron sender: it uses context, causal state, and explicit lifecycle rules to decide whether care or follow-up should appear at all. It covers parked topics, watchful states, delegated tasks, sensitive events, candidate→incident→hook flow, /new carryover, deterministic onboarding/guided settings, and time-aware continuity guards. It does not include always-on idle/social nudging as a default feature.
-version: 2.0.17
+version: 2.0.18
 homepage: https://github.com/redwakame/openclaw-continuity
 metadata:
+  os:
+    - darwin
+    - linux
+  requires:
+    bins:
+      - python3
+    env:
+      - OPENCLAW_STATE_DIR
+      - OPENCLAW_CONFIG_PATH
   openclaw:
+    os:
+      - darwin
+      - linux
+    requires:
+      bins:
+        - python3
+      env:
+        - OPENCLAW_STATE_DIR
+        - OPENCLAW_CONFIG_PATH
+  clawdbot:
+    os:
+      - darwin
+      - linux
+    requires:
+      bins:
+        - python3
+      env:
+        - OPENCLAW_STATE_DIR
+        - OPENCLAW_CONFIG_PATH
+  clawdis:
     os:
       - darwin
       - linux
