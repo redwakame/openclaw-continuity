@@ -316,6 +316,21 @@ This is a state-backed continuity skill. Reading and writing a dedicated
 OpenClaw state directory is expected behavior; reading unrelated host secrets or
 sending user data to external services is not part of this package's design.
 
+## Documentation Links
+
+Use these files when installing, reviewing, or extending the skill:
+
+- [Install guide](docs/install.md): local setup, environment variables, and operator workflow
+- [Harness guide](docs/harness.md): regression harness usage and expected pass criteria
+- [Host operator settings](docs/host-operator-settings.md): guided setup, natural-language settings, and command settings
+- [Routine schedule](docs/routine-schedule.md): sleep/wake, quiet hours, and time-aware behavior
+- [Architecture](docs/v2-architecture.md): continuity layers, event chain, and writeback design
+- [Validation summary](docs/v2-validation-summary.md): release validation notes
+- [Release acceptance](docs/release-acceptance.md): checks to run before publishing
+- [Known limits](docs/v2-known-limits.md): boundaries and non-goals
+- [Security notes](SECURITY.md): reporting and security expectations
+- [ClawHub page](https://clawhub.ai/redwakame/openclaw-continuity): registry install and scan status
+
 ## Verify
 
 Run the regression harness:
