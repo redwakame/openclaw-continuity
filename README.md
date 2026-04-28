@@ -282,6 +282,40 @@ npm-style fetch from GitHub:
 npm install github:redwakame/openclaw-continuity#v2.0.21
 ```
 
+## Install Review Notes
+
+This package uses an instruction-first install path. There is no opaque remote
+installer in the registry entry; the visible steps are the OpenClaw skill
+install command, the Python dependency install, and the optional local helper
+script.
+
+Runtime requirements are intentionally small:
+
+- `python3`
+- `OPENCLAW_STATE_DIR`
+- `OPENCLAW_CONFIG_PATH`
+- Python dependency: `send2trash`
+
+The skill contains executable Python runtime scripts, including the main
+`scripts/personal_hooks.py` runtime. Before running it against a sensitive or
+production agent, review the scripts you plan to execute, especially:
+
+- `scripts/personal_hooks.py`
+- `scripts/followup_skill_harness.py`
+- `scripts/install_local.sh`
+
+Suggested checks:
+
+- confirm there are no unexpected network calls or hardcoded remote endpoints
+- confirm only the declared state/config paths are needed for normal runtime
+- use an isolated `OPENCLAW_STATE_DIR` for first-run testing
+- avoid pointing `OPENCLAW_CONFIG_PATH` at a production config containing
+  provider keys until you have reviewed the code
+
+This is a state-backed continuity skill. Reading and writing a dedicated
+OpenClaw state directory is expected behavior; reading unrelated host secrets or
+sending user data to external services is not part of this package's design.
+
 ## Verify
 
 Run the regression harness:
