@@ -1,61 +1,104 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1400" height="820" viewBox="0 0 1400 820" role="img" aria-labelledby="title desc">
-  <title id="title">OpenClaw Continuity command settings comic</title>
-  <desc id="desc">A bilingual comic panel showing precise command-based settings changes for OpenClaw Continuity.</desc>
+  <title id="title">OpenClaw Continuity precise command settings</title>
+  <desc id="desc">A professional bilingual panel showing command-based setup checks, targeted settings changes, and auditable results for OpenClaw Continuity.</desc>
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#f5f7ff"/>
-      <stop offset="55%" stop-color="#fffaf0"/>
-      <stop offset="100%" stop-color="#efffed"/>
+    <linearGradient id="pageBg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f7fbff"/>
+      <stop offset="50%" stop-color="#f8f5ef"/>
+      <stop offset="100%" stop-color="#eef8f1"/>
     </linearGradient>
-    <filter id="shadow" x="-20%" y="-20%" width="140%" height="150%">
-      <feDropShadow dx="0" dy="14" stdDeviation="16" flood-color="#617191" flood-opacity="0.24"/>
+    <linearGradient id="heroLine" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#2f80ed"/>
+      <stop offset="100%" stop-color="#12b886"/>
+    </linearGradient>
+    <linearGradient id="terminal" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#101827"/>
+      <stop offset="100%" stop-color="#182235"/>
+    </linearGradient>
+    <filter id="cardShadow" x="-12%" y="-18%" width="124%" height="142%">
+      <feDropShadow dx="0" dy="18" stdDeviation="20" flood-color="#31415f" flood-opacity="0.20"/>
+    </filter>
+    <filter id="softShadow" x="-16%" y="-20%" width="132%" height="148%">
+      <feDropShadow dx="0" dy="10" stdDeviation="13" flood-color="#31415f" flood-opacity="0.16"/>
     </filter>
     <style>
-      .title { font: 800 48px -apple-system, BlinkMacSystemFont, "Noto Sans CJK TC", "PingFang TC", Arial, sans-serif; fill: #25325b; }
-      .subtitle { font: 500 24px -apple-system, BlinkMacSystemFont, "Noto Sans CJK TC", "PingFang TC", Arial, sans-serif; fill: #535a67; }
-      .label { font: 800 24px -apple-system, BlinkMacSystemFont, "Noto Sans CJK TC", "PingFang TC", Arial, sans-serif; fill: #263145; }
-      .body { font: 500 21px -apple-system, BlinkMacSystemFont, "Noto Sans CJK TC", "PingFang TC", Arial, sans-serif; fill: #3f4654; }
-      .small { font: 500 18px -apple-system, BlinkMacSystemFont, "Noto Sans CJK TC", "PingFang TC", Arial, sans-serif; fill: #5c6370; }
-      .mono { font: 700 18px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; fill: #273044; }
+      .titleText { font: 850 46px -apple-system, BlinkMacSystemFont, "Noto Sans CJK TC", "PingFang TC", Arial, sans-serif; fill: #1e293b; letter-spacing: -0.7px; }
+      .subtitleText { font: 560 23px -apple-system, BlinkMacSystemFont, "Noto Sans CJK TC", "PingFang TC", Arial, sans-serif; fill: #526070; }
+      .sectionLabel { font: 820 25px -apple-system, BlinkMacSystemFont, "Noto Sans CJK TC", "PingFang TC", Arial, sans-serif; fill: #1f2a44; }
+      .sectionMeta { font: 650 15px -apple-system, BlinkMacSystemFont, "Noto Sans CJK TC", "PingFang TC", Arial, sans-serif; fill: #4f6f93; letter-spacing: 1.8px; text-transform: uppercase; }
+      .terminalText { font: 740 19px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; fill: #f8fafc; }
+      .terminalComment { font: 700 18px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; fill: #9fb3ca; }
+      .terminalAccent { font: 760 18px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; fill: #8bd3ff; }
+      .resultMono { font: 820 21px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; fill: #16324f; }
+      .bodyText { font: 610 20px -apple-system, BlinkMacSystemFont, "Noto Sans CJK TC", "PingFang TC", Arial, sans-serif; fill: #405166; }
+      .smallText { font: 580 17px -apple-system, BlinkMacSystemFont, "Noto Sans CJK TC", "PingFang TC", Arial, sans-serif; fill: #5e6b7c; }
+      .badgeText { font: 760 14px -apple-system, BlinkMacSystemFont, "Noto Sans CJK TC", "PingFang TC", Arial, sans-serif; fill: #0f766e; letter-spacing: 1.2px; }
     </style>
   </defs>
-  <rect width="1400" height="820" rx="38" fill="url(#bg)"/>
-  <circle cx="1175" cy="155" r="140" fill="#d6ecff" opacity="0.65"/>
-  <circle cx="205" cy="690" r="145" fill="#ffe3bc" opacity="0.5"/>
 
-  <text x="70" y="88" class="title">4. Precise Command Changes</text>
-  <text x="70" y="126" class="subtitle">工程使用者可以用指令檢查與精準修改，不靠猜。</text>
+  <rect width="1400" height="820" rx="42" fill="url(#pageBg)"/>
+  <circle cx="1210" cy="116" r="132" fill="#dff1ff" opacity="0.82"/>
+  <circle cx="142" cy="706" r="155" fill="#ffe7bf" opacity="0.55"/>
+  <path d="M0 695 C170 658 270 735 416 700 C610 655 750 724 910 682 C1075 638 1208 660 1400 618 L1400 820 L0 820 Z" fill="#edf8ec" opacity="0.58"/>
 
-  <g filter="url(#shadow)">
-    <rect x="86" y="190" width="1228" height="465" rx="34" fill="#ffffff"/>
+  <text x="70" y="78" class="titleText">4. Precise Command Changes</text>
+  <text x="70" y="116" class="subtitleText">工程使用者可以用指令檢查與精準修改；一般使用者仍可用自然語言調整。</text>
+  <rect x="70" y="140" width="245" height="8" rx="4" fill="url(#heroLine)"/>
+
+  <g filter="url(#cardShadow)">
+    <rect x="70" y="176" width="1260" height="526" rx="38" fill="#ffffff"/>
   </g>
 
   <g>
-    <text x="135" y="252" class="label">Check current state</text>
-    <rect x="135" y="290" width="530" height="92" rx="22" fill="#202331"/>
-    <text x="165" y="326" class="mono" fill="#eef2ff">python3 scripts/personal_hooks.py setup-check</text>
-    <text x="165" y="358" class="mono" fill="#eef2ff"># shows configured / missing fields</text>
+    <text x="124" y="235" class="sectionMeta">Step 01</text>
+    <text x="124" y="270" class="sectionLabel">Check current state</text>
 
-    <text x="135" y="445" class="label">Apply one exact change</text>
-    <rect x="135" y="482" width="610" height="112" rx="22" fill="#202331"/>
-    <text x="165" y="518" class="mono" fill="#eef2ff">python3 scripts/personal_hooks.py setup-apply \</text>
-    <text x="165" y="550" class="mono" fill="#eef2ff">  --payload-json '{"new_session_continuity_mode":</text>
-    <text x="165" y="582" class="mono" fill="#eef2ff">  "last_user_intent_first"}'</text>
+    <g filter="url(#softShadow)">
+      <rect x="124" y="302" width="560" height="112" rx="24" fill="url(#terminal)"/>
+    </g>
+    <circle cx="154" cy="328" r="7" fill="#ff6b6b"/>
+    <circle cx="178" cy="328" r="7" fill="#ffd166"/>
+    <circle cx="202" cy="328" r="7" fill="#51cf66"/>
+    <text x="154" y="364" class="terminalText">python3 scripts/personal_hooks.py setup-check</text>
+    <text x="154" y="392" class="terminalComment"># configured fields, missing fields, current mode</text>
+
+    <text x="124" y="468" class="sectionMeta">Step 02</text>
+    <text x="124" y="503" class="sectionLabel">Apply one exact change</text>
+
+    <g filter="url(#softShadow)">
+      <rect x="124" y="535" width="648" height="150" rx="24" fill="url(#terminal)"/>
+    </g>
+    <circle cx="154" cy="561" r="7" fill="#ff6b6b"/>
+    <circle cx="178" cy="561" r="7" fill="#ffd166"/>
+    <circle cx="202" cy="561" r="7" fill="#51cf66"/>
+    <text x="154" y="592" class="terminalText">python3 scripts/personal_hooks.py setup-apply \</text>
+    <text x="154" y="621" class="terminalAccent">  --payload-json '{</text>
+    <text x="174" y="650" class="terminalAccent">"new_session_continuity_mode":"last_user_intent_first"</text>
+    <text x="154" y="675" class="terminalAccent">}'</text>
   </g>
 
-  <path d="M760 430 C812 398 858 398 910 430" fill="none" stroke="#90b8e5" stroke-width="14" stroke-linecap="round"/>
-  <path d="M880 399 L918 430 L880 461" fill="none" stroke="#90b8e5" stroke-width="14" stroke-linecap="round"/>
+  <path d="M812 456 C872 416 930 416 990 456" fill="none" stroke="#86b7ee" stroke-width="14" stroke-linecap="round"/>
+  <path d="M957 420 L1002 456 L957 492" fill="none" stroke="#86b7ee" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
 
   <g>
-    <text x="965" y="252" class="label">Auditable result</text>
-    <rect x="965" y="292" width="270" height="250" rx="28" fill="#eef8ff"/>
-    <text x="995" y="336" class="mono">applied: 1</text>
-    <text x="995" y="374" class="mono">skipped: 0</text>
-    <text x="995" y="412" class="mono">mode updated</text>
-    <text x="995" y="470" class="small">Only requested fields change.</text>
-    <text x="995" y="500" class="small">只改指定欄位。</text>
+    <text x="990" y="235" class="sectionMeta">Step 03</text>
+    <text x="990" y="270" class="sectionLabel">Auditable result</text>
+
+    <g filter="url(#softShadow)">
+      <rect x="990" y="302" width="278" height="260" rx="30" fill="#eef8ff"/>
+    </g>
+    <rect x="1024" y="335" width="104" height="28" rx="14" fill="#d7f5e8"/>
+    <text x="1044" y="355" class="badgeText">APPLIED</text>
+    <text x="1024" y="405" class="resultMono">applied: 1</text>
+    <text x="1024" y="445" class="resultMono">skipped: 0</text>
+    <text x="1024" y="485" class="resultMono">mode updated</text>
+    <path d="M1024 513 L1235 513" stroke="#c8deef" stroke-width="2" stroke-linecap="round"/>
+    <text x="1024" y="542" class="smallText">Only requested fields change.</text>
+    <text x="1024" y="570" class="smallText">只改指定欄位，可回查。</text>
   </g>
 
-  <rect x="92" y="705" width="1215" height="52" rx="26" fill="#ffffff" opacity="0.82"/>
-  <text x="122" y="738" class="small">Key point: commands are for precise operations; natural language remains available for normal users.</text>
+  <g filter="url(#softShadow)">
+    <rect x="106" y="728" width="1188" height="58" rx="29" fill="#ffffff" opacity="0.94"/>
+  </g>
+  <text x="140" y="765" class="bodyText">Key point: precise commands are available for operators; natural language remains available for normal users.</text>
 </svg>
