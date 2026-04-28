@@ -114,13 +114,13 @@ Default installation installs the **skill package only**.
 
 It does **not** automatically:
 
-- install a host bridge plugin
+- install a host adapter plugin
 - patch gateway runtime files
 - change outbound channel behavior
 
 If you need host-side outbound filtering or channel delivery behavior, implement
 and test it in the host adapter for your own deployment. This package does not
-ship an installable channel bridge.
+ship an installable channel adapter.
 
 If the host uses background heartbeat pushes, also configure heartbeat session
 isolation in `openclaw.json`:
@@ -168,7 +168,7 @@ Installing the skill alone gives you the shared follow-up/continuity engine.
 
 If you also want full live channel behavior, the host may still need to wire:
 
-- **Channel bridge / outbound last-defense**
+- **Channel adapter / outbound last-defense**
 - **gateway hook wiring**
 - **live heartbeat host glue**
 
@@ -270,7 +270,7 @@ The intended public V2 path is:
 Channel-specific delivery is optional for package validation and is not required for the core skill behavior.
 
 If you want channel-facing frontstage stopgap behavior, implement it in the host
-bridge for your channel. The skill package itself stays portable and
+adapter for your channel. The skill package itself stays portable and
 channel-neutral.
 
 ## Common troubleshooting

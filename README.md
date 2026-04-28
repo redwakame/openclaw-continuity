@@ -279,7 +279,7 @@ openclaw skills install openclaw-continuity
 npm-style fetch from GitHub:
 
 ```bash
-npm install github:redwakame/openclaw-continuity#v2.0.19
+npm install github:redwakame/openclaw-continuity#v2.0.21
 ```
 
 ## Verify

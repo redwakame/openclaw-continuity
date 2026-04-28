@@ -31,15 +31,15 @@ All paths can be overridden via env vars (`PERSONAL_HOOKS_*`), mitigating risk.
 | sessions.json schema | Root dict, key → entry dict with `sessionFile`, `updatedAt`, `lastHeartbeatText`, `lastHeartbeatSentAt` |
 | Heartbeat detection | `":heartbeat" in session_key` — bypass all prompt injection |
 
-### 1.3 Bridge Lifecycle Hooks (HIGH impact)
+### 1.3 Adapter Lifecycle Hooks (HIGH impact)
 
 | CLI Command | Called By | Purpose |
 |------------|-----------|---------|
-| `preagent-sync` | Bridge (before model generation) | Intercept inbound user text, run decision loop |
-| `runtime-context` | Bridge (prompt assembly) | Inject pending topics / preferences / schedule / setup into model context |
-| `frontstage-guard` | Bridge (before outbound send) | Filter output for frontstage safety |
+| `preagent-sync` | Adapter (before model generation) | Intercept inbound user text, run decision loop |
+| `runtime-context` | Adapter (prompt assembly) | Inject pending topics / preferences / schedule / setup into model context |
+| `frontstage-guard` | Adapter (before outbound send) | Filter output for frontstage safety |
 
-Bridge integration depends on:
+Adapter integration depends on:
 - Anchor markers in TypeScript source (e.g. `"runtime-context"` string in `get-reply-run.ts`)
 - JSON stdin/stdout contract (command → JSON output)
 - Field names in runtime-context response (10+ prompt fields)
@@ -73,7 +73,7 @@ All parameterized via env vars — no hardcoded channel assumptions.
 ### 1.7 Tool / Command Interface (LOW impact)
 
 - 30+ argparse subcommands, all output JSON to stdout
-- Bridge parses specific fields from `runtime-context`, `preagent-sync`, `frontstage-guard`
+- Adapter parses specific fields from `runtime-context`, `preagent-sync`, `frontstage-guard`
 - Other commands (profile-show, setup-check, etc.) are standalone utilities
 
 ---
@@ -96,10 +96,10 @@ All parameterized via env vars — no hardcoded channel assumptions.
 - **Impact**: If runtime source reorganized, anchor detection fails → capability_state reports partial/missing
 - **Bucket**: A (shared), but graceful degradation (returns "partial" not crash)
 
-### BLOCKER-4: Bridge lifecycle hook invocation
-- **Evidence**: Three CLI commands (`preagent-sync`, `runtime-context`, `frontstage-guard`) called by bridge at specific lifecycle points
-- **Impact**: If bridge removes/renames these integration points, skill becomes inert
-- **Bucket**: B (bridge patches are per-host)
+### BLOCKER-4: Adapter lifecycle hook invocation
+- **Evidence**: Three CLI commands (`preagent-sync`, `runtime-context`, `frontstage-guard`) called by adapter at specific lifecycle points
+- **Impact**: If adapter removes/renames these integration points, skill becomes inert
+- **Bucket**: B (adapter patches are per-host)
 - **Note**: v2026.3.24 added `before_dispatch` hook — may provide alternative integration path
 
 ---
@@ -124,8 +124,8 @@ All parameterized via env vars — no hardcoded channel assumptions.
 
 | Change | Version | Impact on Skill |
 |--------|---------|----------------|
-| Plugin SDK overhaul | 3.22 | `openclaw/extension-api` removed — skill doesn't import this, but bridge patches might |
-| `before_dispatch` hook | 3.24 | New lifecycle hook — potential alternative to current bridge patches |
+| Plugin SDK overhaul | 3.22 | `openclaw/extension-api` removed — skill doesn't import this, but adapter patches might |
+| `before_dispatch` hook | 3.24 | New lifecycle hook — potential alternative to current adapter patches |
 | Cron heartbeat prompt suppression | 3.24 | Cron runs no longer read HEARTBEAT.md — aligns with skill's heartbeat isolation |
 | Heartbeat direct delivery default change | 3.22→3.24 | Flipped twice — current default is `allow`; skill's heartbeat dispatch assumes this |
 | Memory-lancedb proxy fix | 3.24 | Fixes proxy environments; no behavioral change for skill |
@@ -150,7 +150,7 @@ All parameterized via env vars — no hardcoded channel assumptions.
 - [ ] `_resolve_openclaw_runtime_dir()` finds v2026.4.5 directory
 - [ ] `load_memory_lancedb_embedding_config()` returns valid config or empty dict (not crash)
 
-### Phase 3: Live smoke (after bridge reconnection)
+### Phase 3: Live smoke (after adapter reconnection)
 - [ ] Heartbeat still fires (`:heartbeat` session created)
 - [ ] `HEARTBEAT_OK` response not blocked
 - [ ] `runtime-context` output injected into model prompt (check via test message)
@@ -185,7 +185,7 @@ All parameterized via env vars — no hardcoded channel assumptions.
 | CLI command interface | A | Shared code, same commands everywhere |
 | Session key parsing | A | Shared code in `session_role_for_key()` |
 | Plugin config reading | A | Shared code in `load_memory_lancedb_embedding_config()` |
-| Bridge patches (TypeScript) | B | Per-host, version-specific runtime patches |
+| Adapter patches (TypeScript) | B | Per-host, version-specific runtime patches |
 | Manifest / locale config | B | Per-host configuration files |
 | openclaw.json heartbeat config | B | Per-host config, not in skill code |
 | Persona / SOUL.md | C | Not an upgrade concern |

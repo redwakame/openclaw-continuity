@@ -224,8 +224,8 @@ scripts/
   event_store.py          — Event Store 模組（獨立，可 CLI / import）
   personal_hooks.py       — Hook Store + arbiter + runtime-context
 plugins/
-  personal-hooks-bridge/
-    index.ts              — Gateway bridge（注入 event context）
+  personal-hooks-host-adapter/
+    index.ts              — Gateway adapter（注入 event context）
 data/
   events.json             — Event Store 資料
   hooks.json              — Hook Store 資料

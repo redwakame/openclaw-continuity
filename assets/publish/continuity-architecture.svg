@@ -81,6 +81,6 @@
 
   <path d="M355 465 C410 465, 425 465, 460 465" fill="none" stroke="#8ea8ba" stroke-width="8" stroke-linecap="round"/>
   <path d="M1135 530 C1170 530, 1180 530, 1217 530" fill="none" stroke="#8ea8ba" stroke-width="8" stroke-linecap="round"/>
-  <polygon points="454,452 482,465 454,478" fill="#8ea8ba"/>
-  <polygon points="1210,517 1238,530 1210,543" fill="#8ea8ba"/>
+  <path d="M454 452 L482 465 L454 478 Z" fill="#8ea8ba"/>
+  <path d="M1210 517 L1238 530 L1210 543 Z" fill="#8ea8ba"/>
 </svg>

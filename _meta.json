@@ -1,6 +1,6 @@
 {
   "name": "personal-hooks",
-  "version": "2.0.19",
+  "version": "2.0.21",
   "description": "OpenClaw Continuity is a time-aware continuity and follow-up skill package with /new carryover, staged memory, tracked events, natural-language setting changes, and structured writeback.",
   "author": "OpenClaw Continuity Maintainers",
   "license": "MIT-0",
@@ -48,6 +48,30 @@
         "OPENCLAW_STATE_DIR",
         "OPENCLAW_CONFIG_PATH"
       ]
+    },
+    "envVars": [
+      {
+        "name": "OPENCLAW_STATE_DIR",
+        "description": "Required path to the dedicated OpenClaw state directory used by this skill for continuity state.",
+        "required": true
+      },
+      {
+        "name": "OPENCLAW_CONFIG_PATH",
+        "description": "Required path to the OpenClaw config file used for setup validation.",
+        "required": true
+      }
+    ]
+  },
+  "envVars": [
+    {
+      "name": "OPENCLAW_STATE_DIR",
+      "description": "Required path to the dedicated OpenClaw state directory used by this skill for continuity state.",
+      "required": true
+    },
+    {
+      "name": "OPENCLAW_CONFIG_PATH",
+      "description": "Required path to the OpenClaw config file used for setup validation.",
+      "required": true
     }
-  }
+  ]
 }

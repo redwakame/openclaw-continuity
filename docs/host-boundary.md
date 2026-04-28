@@ -3,9 +3,9 @@
 ## Purpose
 
 This document clarifies what belongs to the **public skill** (shared, portable)
-and what belongs to the **host gateway / bridge** (private, instance-specific).
+and what belongs to the **host gateway / adapter** (private, instance-specific).
 A public skill cannot claim it automatically guarantees channel frontstage
-safety; the host must wire its own bridge hooks. See also
+safety; the host must wire its own adapter hooks. See also
 [`channel-boundary-stopgap.md`](channel-boundary-stopgap.md) for the minimal
 channel-boundary stopgap used to suppress `<final>` leakage and weird heartbeat
 text, and [`host-operator-settings.md`](host-operator-settings.md) for the
@@ -31,17 +31,17 @@ in this layer. Temp-dir prefixes use `ph-` (personal-hooks).
 
 ---
 
-## Layer 2 — Host / Bridge (B-class)
+## Layer 2 — Host / Adapter (B-class)
 
 These files live **outside** the skill directory, in the gateway's plugin tree.
 They are instance-specific and NOT part of the public skill.
 
 | Path (relative to stateDir) | Role |
 |------------------------------|------|
-| `workspace/plugins/personal-hooks-bridge/index.ts` | Bridge: wires `message_sending` + `before_message_write` hooks |
+| `workspace/plugins/personal-hooks-host-adapter/index.ts` | Adapter: wires `message_sending` + `before_message_write` hooks |
 | `openclaw.json` | Gateway config incl. `agents.defaults.heartbeat` |
 
-**What the bridge does that the skill cannot**:
+**What the adapter does that the skill cannot**:
 
 1. **`message_sending` hook** — intercepts ALL outbound (including heartbeat)
    inside `deliverOutboundPayloads`. This is the last line of defense against
@@ -85,7 +85,7 @@ mechanism. They do **not** automatically get every host/live integration.
 
 The missing host pieces are usually:
 
-- **Channel bridge / outbound last-defense**
+- **Channel adapter / outbound last-defense**
   - the final outbound interception layer before channel delivery
 - **gateway hook wiring**
   - the lifecycle hookup that makes the skill run at the right reply stages
@@ -107,7 +107,7 @@ Model generates reply
 personal_hooks.py strips narration  ← Skill layer (A)
        │
        ▼
-before_message_write persists       ← Bridge layer (B), session only
+before_message_write persists       ← Adapter layer (B), session only
        │
        ▼
 resolveHeartbeatReplyPayload        ← Gateway internal, uses RAW replyResult
@@ -116,7 +116,7 @@ resolveHeartbeatReplyPayload        ← Gateway internal, uses RAW replyResult
 deliverOutboundPayloads             ← Gateway internal
        │
        ▼
-message_sending hook intercepts     ← Bridge layer (B), last defense
+message_sending hook intercepts     ← Adapter layer (B), last defense
        │
        ▼
 Channel adapter send
@@ -125,7 +125,7 @@ Channel adapter send
 The gateway's `resolveHeartbeatReplyPayload` reads from the **raw** model
 result, not the hooked session content. So even if the skill's Python guard
 strips narration perfectly, a dirty heartbeat reply can still leak through
-unless the bridge's `message_sending` hook catches it.
+unless the adapter's `message_sending` hook catches it.
 
 Also: if heartbeat shares the same session key as the direct user thread,
 background heartbeat text can pollute carryover / staging / continuity even
@@ -138,7 +138,7 @@ when the visible outbound message is clean. The correct host fix is to set
 ## Deployment checklist for a new host
 
 1. Install skill to `workspace/skills/personal-hooks/`
-2. Wire a host bridge at `workspace/plugins/personal-hooks-bridge/`
+2. Wire a host adapter at `workspace/plugins/personal-hooks-host-adapter/`
 3. Configure `agents.defaults.heartbeat` in `openclaw.json`
 4. Set `heartbeat.isolatedSession=true` for any host that uses background heartbeat pushes
 5. Verify `message_sending` hook fires: look for `message_sending MODIFY` in gateway logs
